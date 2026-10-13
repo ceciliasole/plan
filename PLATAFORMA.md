@@ -4,12 +4,12 @@
 npm install
 npm run dev          # http://localhost:3000, login de prueba sin Google (DEV_LOGIN=1)
 ```
-Producción: `GOOGLE_CLIENT_ID`, `SESSION_SECRET` (largo, aleatorio), `ADMIN_EMAILS` (tu mail, separados por coma), `NODE_ENV=production`, y opcional `DB_PATH`. Requiere Node >= 22.13 (usa `node:sqlite`).
+Producción: `GOOGLE_CLIENT_ID`, `SESSION_SECRET` (largo, aleatorio), `ADMIN_EMAILS` (tu mail, separados por coma), `NODE_ENV=production`, y opcional `DB_PATH`, `PAY_URL` (link de inscripción/pago que se muestra en la vista previa) y `CONTACT_EMAIL`. Requiere Node >= 22.13 (usa `node:sqlite`).
 
 Google: en Google Cloud Console → Credenciales → ID de cliente OAuth (Aplicación web) → agregar tu dominio en "Orígenes autorizados de JavaScript". El `GOOGLE_CLIENT_ID` es público; no hay secreto de cliente en este flujo.
 
 ## Flujo
-1. `/` login con Google. El mail tiene que estar en la lista de pagos (`/admin`: mails o `@dominio.org`). Se revalida en cada request.
+1. `/` login con Google: entra cualquiera. Sin pago ve las 12 herramientas en **vista previa** (datos de ejemplo, todo deshabilitado, nada se guarda). Con pago (lista en `/admin`: mails o `@dominio.org`) las usa completas. Se revalida en cada request: si dejás de marcarlo como pago, vuelve a vista previa y su trabajo queda guardado pero oculto. Administradores (acceso total, `/admin`): `cecilia.sole@gmail.com` y `hernan@guaraniagency.com`, más lo que pongas en `ADMIN_EMAILS`.
 2. `/onboarding` (primera vez): del dominio del mail toma nombre, sitio, descripción y logos candidatos. La persona confirma, corrige o sube otro logo. Los 2 colores se sacan del logo en el navegador y se corrigen a mano (avisa si no llegan a contraste 4.5:1).
 3. `/app` índice con avance de los 12 pasos. `/tools/<id>` abre cada herramienta con logo y colores de la organización; guarda en servidor solo (700 ms después de cada cambio).
 

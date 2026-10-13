@@ -70,6 +70,7 @@ svg text{fill:var(--ink);font-family:var(--f-b)}
 .brand .logo{height:26px;max-width:120px;object-fit:contain}
 #savestate{font-family:var(--f-m);font-size:12px}#savestate.bad{color:var(--bad)}
 .donechk{display:inline-flex;gap:6px;align-items:center;margin-left:12px;font-size:13px;flex-direction:row;text-transform:none;font-family:var(--f-b);letter-spacing:0}
+button:disabled,input:disabled,select:disabled,textarea:disabled{opacity:.5;cursor:not-allowed;filter:grayscale(1)}
 </style>
 <div id="root"></div>
 <script>window.INDEX_URL="";</script>
@@ -114,18 +115,21 @@ const fld=(l,h)=>`<label class="f">${l}${h}</label>`;
 const fmt=n=>isFinite(n)?Math.round(n).toLocaleString('es-AR'):'—';
 const pct=n=>isFinite(n)?Math.round(n*100)+'%':'—';
 function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2200)}
+const RO=!!(window.IMP&&window.IMP.readonly);
+function lock(){if(RO)document.querySelectorAll('#root input,#root select,#root textarea,#root button').forEach(e=>e.disabled=true)}
 function draw(){
   const a=document.activeElement,fb=a&&a.dataset&&a.dataset.b,ss=a&&a.selectionStart;
   $('#app').innerHTML=TOOL.view();
   if(TOOL.out)$('#out').innerHTML=TOOL.out();
   if(fb){const e=$(`[data-b="${fb}"]`);if(e){e.focus();try{e.setSelectionRange(ss,ss)}catch(_){}}}
+  lock();
 }
 function upd(){if(TOOL.out&&$('#out'))$('#out').innerHTML=TOOL.out()}
-document.addEventListener('input',e=>{const el=e.target,p=el.dataset.b;if(!p)return;
+document.addEventListener('input',e=>{const el=e.target,p=el.dataset.b;if(!p||RO)return;
   let v=el.type==='checkbox'?el.checked:(el.type==='number'||el.type==='range')?(el.value===''?'':Number(el.value)):el.value;
   setp(p,v);persist();if(el.type==='range'){const o=el.closest('label')?.querySelector('[data-v]');if(o)o.textContent=v}if(el.hasAttribute('data-redraw'))draw();else upd()});
 document.addEventListener('change',e=>{const el=e.target;if(el.hasAttribute&&el.hasAttribute('data-redraw')&&el.tagName==='SELECT'){draw()}});
-document.addEventListener('click',async e=>{const el=e.target.closest('[data-a]');if(!el)return;const a=el.dataset.a,p=el.dataset.p,i=el.dataset.i;
+document.addEventListener('click',async e=>{const el=e.target.closest('[data-a]');if(!el||RO)return;const a=el.dataset.a,p=el.dataset.p,i=el.dataset.i;
   if(a==='add'){getp(p).push(JSON.parse(JSON.stringify(TOOL.blank[p])));persist();draw()}
   else if(a==='del'){getp(p).splice(+i,1);persist();draw()}
   else if(a==='copy'){const t=TOOL.summary();try{await navigator.clipboard.writeText(t);toast('Resumen copiado')}catch(_){const b=$('#cpbox');b.hidden=false;b.querySelector('textarea').value=t;b.querySelector('textarea').select()}}
@@ -135,9 +139,11 @@ document.addEventListener('click',async e=>{const el=e.target.closest('[data-a]'
 function shell(){
   const idx=(window.INDEX_URL||'');
   const brand=IMP&&IMP.org?`<span class="brand">${IMP.org.logo?`<img src="${esc(IMP.org.logo)}" alt="" class="logo">`:''}${esc(IMP.org.name)}</span>`:'';
-  const note=IMP?`<span id="savestate" role="status">Guardado</span> <label class="donechk"><input type="checkbox" id="donechk" ${IMP.done?'checked':''}> Lo di por terminado</label>`:'Tu trabajo se guarda en este navegador. Nadie más lo ve. Si querés comentarlo con nosotras, copiá el resumen y pegalo en un mail.';
+  const pay=RO?(IMP.pay.url?`<a href="${esc(IMP.pay.url)}">activá tu inscripción</a>`:`escribinos a <a href="mailto:${esc(IMP.pay.contact)}">${esc(IMP.pay.contact)}</a> para activar tu inscripción`):'';
+  const banner=RO?`<div class="note" role="status"><b>Vista previa.</b> Estos son datos de ejemplo y no se puede editar ni guardar. Para completar esta herramienta, ${pay}.</div>`:'';
+  const note=RO?'Vista previa, sin guardado.':IMP?`<span id="savestate" role="status">Guardado</span> <label class="donechk"><input type="checkbox" id="donechk" ${IMP.done?'checked':''}> Lo di por terminado</label>`:'Tu trabajo se guarda en este navegador. Nadie más lo ve. Si querés comentarlo con nosotras, copiá el resumen y pegalo en un mail.';
   $('#root').innerHTML=`<div class="wrap"><div class="top"><span>${brand||''}Año de planificación · Mes ${TOOL.mes} de 12</span>${idx?`<a href="${idx}">Ver los 12 pasos</a>`:'<span>impactese</span>'}</div>
-  <h1>${TOOL.title}</h1><p class="lead">${TOOL.lead}</p><div class="how">${TOOL.how.map(h=>`<span>${h}</span>`).join('')}</div>
+  ${banner}<h1>${TOOL.title}</h1><p class="lead">${TOOL.lead}</p><div class="how">${TOOL.how.map(h=>`<span>${h}</span>`).join('')}</div>
   <div id="app"></div>
   <div class="foot"><button class="p" data-a="copy">Copiar resumen</button><button data-a="save">Descargar</button><button data-a="reset">Empezar de cero</button><p class="sub">${note}</p></div>
   <div id="cpbox" hidden class="card"><p class="sub">Seleccioná todo y copiá el texto:</p><textarea class="cp" readonly></textarea></div></div>`;

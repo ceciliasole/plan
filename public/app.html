@@ -5,20 +5,21 @@
 .c h2{font-size:18px}.c p{margin:0;color:var(--muted);font-size:14px;flex:1}.m{font:12px var(--f-m);color:var(--red);text-transform:uppercase;letter-spacing:.06em}
 .go{align-self:flex-start;font-weight:600;color:var(--blue);border-bottom:2px solid var(--red)}
 .who{display:flex;align-items:center;gap:12px}.who img{height:44px;max-width:160px;object-fit:contain}</style>
-<div class="wrap"><div class="top"><span id="mail"></span><span><a href="/onboarding">Datos de la organización</a> · <a href="#" id="out">Salir</a></span></div>
+<div class="wrap"><div class="top"><span id="mail"></span><span><a href="/onboarding" id="orglink" hidden>Datos de la organización</a> <a href="#" id="out">Salir</a></span></div>
 <div class="who" style="margin-top:14px"><img id="logo" alt="" hidden><h1 id="org" style="margin:0"></h1></div>
-<p class="lead" id="prog"></p><ol class="list" id="list"></ol></div>
+<div id="pay" class="note" role="status" hidden></div><p class="lead" id="prog"></p><ol class="list" id="list"></ol></div>
 <script>
 const DESC={prioridades:'Qué hacer ya, qué planificar, qué delegar y qué dejar ir.',bcg:'Qué programas invertir, sostener, cosechar o cerrar.',pestel:'Cómo te afecta el contexto político, económico, social, tecnológico, ambiental y legal.',stakeholders:'A quién dedicarle tiempo este año, según poder e interés.',identidad:'Tu propósito, misión, visión o manifiesto, y el enunciado que guía lo que decís.',matriz:'Dónde estás frente a tus alternativas reales y dónde hay espacio.',finanzas:'Reservas, dependencia, fondos asegurados y peso de la estructura.',digital:'Qué es tuyo, qué depende de una persona y qué está expuesto.',roi:'Cuánto valor social genera cada peso, con su rango de fragilidad.',okr:'Objetivos, resultados clave, responsables y cronograma.',presupuesto:'Caja mes a mes y los baches que hay que cubrir.',plan:'Todo junto, con riesgos y los primeros 90 días.'};
 const L={todo:'Sin empezar',started:'En curso',done:'Terminado'},K={todo:'',started:'warn',done:'good'};
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 (async()=>{
-  const [me,pr]=await Promise.all([fetch('/api/me').then(r=>r.json()),fetch('/api/progress').then(r=>r.json())]);
-  mail.textContent=me.email;org.textContent=me.org.name;
-  if(me.org.logo){logo.src=me.org.logo;logo.hidden=false}
+  const [me,pr,cfg]=await Promise.all([fetch('/api/me').then(r=>r.json()),fetch('/api/progress').then(r=>r.json()),fetch('/api/config').then(r=>r.json())]);
+  mail.textContent=me.email;org.textContent=me.paid?me.org.name:'Un año para planificar bien';orglink.hidden=!me.paid;
+  if(!me.paid){pay.hidden=false;pay.innerHTML='<b>Estás en modo vista previa.</b> Podés recorrer las 12 herramientas para ver qué hace cada una, pero no se pueden completar ni guardar hasta que actives tu inscripción: '+(cfg.payUrl?'<a href="'+esc(cfg.payUrl)+'">inscribite acá</a>.':'escribinos a <a href="mailto:'+esc(cfg.contact)+'">'+esc(cfg.contact)+'</a>.')}
+  if(me.paid&&me.org.logo){logo.src=me.org.logo;logo.hidden=false}
   const d=pr.filter(p=>p.status==='done').length;
-  prog.textContent=d+' de 12 pasos terminados. Podés empezar por cualquiera; el orden sugerido va de lo que decidís primero a lo que se apoya en eso.';
-  list.innerHTML=pr.map(p=>'<li class="c"><span class="m">Paso '+p.mes+'</span><h2>'+esc(p.name)+'</h2><p>'+esc(DESC[p.id]||'')+'</p><div class="row"><a class="go" href="/tools/'+p.id+'">'+(p.status==='todo'?'Empezar':'Continuar')+'</a><span class="chip '+K[p.status]+'">'+L[p.status]+'</span></div></li>').join('');
+  prog.textContent=me.paid?d+' de 12 pasos terminados. Podés empezar por cualquiera; el orden sugerido va de lo que decidís primero a lo que se apoya en eso.':'Doce herramientas, una por mes. El orden sugerido va de lo que decidís primero a lo que se apoya en eso.';
+  list.innerHTML=pr.map(p=>'<li class="c"><span class="m">Paso '+p.mes+'</span><h2>'+esc(p.name)+'</h2><p>'+esc(DESC[p.id]||'')+'</p><div class="row"><a class="go" href="/tools/'+p.id+'">'+(!me.paid?'Ver cómo funciona':p.status==='todo'?'Empezar':'Continuar')+'</a>'+(me.paid?'<span class="chip '+K[p.status]+'">'+L[p.status]+'</span>':'<span class="chip">Bloqueada</span>')+'</div></li>').join('');
   out.onclick=async e=>{e.preventDefault();await fetch('/api/logout',{method:'POST'});location.href='/'};
 })();
 </script>

@@ -5,7 +5,7 @@ import { isPaid } from './db.js';
 const SECRET = process.env.SESSION_SECRET || (process.env.NODE_ENV === 'production' ? null : 'dev-secret');
 if (!SECRET) throw new Error('Falta SESSION_SECRET');
 export const CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
-export const ADMINS = (process.env.ADMIN_EMAILS || '').toLowerCase().split(',').map(s => s.trim()).filter(Boolean);
+export const ADMINS = [...new Set(['cecilia.sole@gmail.com', 'hernan@guaraniagency.com', ...(process.env.ADMIN_EMAILS || '').toLowerCase().split(',')].map(s => s.trim()).filter(Boolean))];
 const TTL = 14 * 24 * 3600 * 1000;
 const google = new OAuth2Client();
 
@@ -37,15 +37,19 @@ export async function verifyGoogle(credential) {
   return p.email.toLowerCase();
 }
 
-// Re-chequea el pago en cada request: si lo revocás, se corta al instante.
+// Cualquier cuenta de Google verificada entra. El pago decide si puede usar el programa (paid) o solo mirarlo.
+// Se re-chequea en cada request: si lo revocás, vuelve a modo vista previa al instante.
 export function requireUser(req, res, next) {
   const email = readCookie(req);
-  if (!email || (!isPaid(email) && !ADMINS.includes(email))) {
+  if (!email) {
     if (req.accepts('html') && !req.path.startsWith('/api/')) return res.redirect('/');
     return res.status(401).json({ error: 'no_session' });
   }
-  req.user = { email, admin: ADMINS.includes(email) };
+  const admin = ADMINS.includes(email);
+  req.user = { email, admin, paid: admin || isPaid(email) };
   next();
 }
+export const requirePaid = (req, res, next) =>
+  req.user.paid ? next() : res.status(402).json({ error: 'payment_required' });
 export const requireAdmin = (req, res, next) =>
   req.user.admin ? next() : res.status(403).json({ error: 'forbidden' });
