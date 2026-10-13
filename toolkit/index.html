@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+</head><body>
+<title>Un año de planificación</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>/* Layout: cuaderno de trabajo sobre papel cuadriculado; una columna de lectura, tableros que se ensanchan */
+:root{--bg:#EDF0F2;--surface:#FAFBFC;--ink:#1B2430;--muted:#59677A;--line:#CAD2DA;--blue:#24478F;--blue-soft:#DDE6F6;--red:#C8372D;--red-soft:#F8E1DE;--good:#2E7D5B;--good-soft:#DCEFE6;--warn:#B67A0C;--warn-soft:#F7ECCF;--bad:#C0392B;--bad-soft:#F6DEDA;--grid:rgba(36,71,143,.06);--f-d:'Bricolage Grotesque',system-ui,sans-serif;--f-b:'IBM Plex Sans',system-ui,sans-serif;--f-m:'IBM Plex Mono',ui-monospace,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#111820;--surface:#19222D;--ink:#E5EAF0;--muted:#92A0B1;--line:#2C3846;--blue:#8FB0F0;--blue-soft:#1F2D47;--red:#F0705F;--red-soft:#3A2321;--good:#5CC49A;--good-soft:#173328;--warn:#E3B04B;--warn-soft:#38301A;--bad:#EE7A6C;--bad-soft:#3A2321;--grid:rgba(143,176,240,.06);color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#111820;--surface:#19222D;--ink:#E5EAF0;--muted:#92A0B1;--line:#2C3846;--blue:#8FB0F0;--blue-soft:#1F2D47;--red:#F0705F;--red-soft:#3A2321;--good:#5CC49A;--good-soft:#173328;--warn:#E3B04B;--warn-soft:#38301A;--bad:#EE7A6C;--bad-soft:#3A2321;--grid:rgba(143,176,240,.06);color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-b);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px}
+.wrap{max-width:980px;margin:0 auto;padding-inline:16px;padding-block:20px 56px}
+.top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font:12px var(--f-m);color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.top a{color:var(--blue)}
+h1{font:700 clamp(28px,5vw,42px)/1.08 var(--f-d);margin:14px 0 8px;text-wrap:balance;letter-spacing:-.01em}
+h2{font:600 20px/1.2 var(--f-d);margin:0 0 4px;text-wrap:balance}
+h3{font:600 15px var(--f-b);margin:0}
+.lead{max-width:62ch;color:var(--muted);margin:0 0 6px}
+.how{display:flex;flex-wrap:wrap;gap:8px 18px;margin:14px 0 22px;font-size:13px;color:var(--muted)}
+.how b{color:var(--ink);font-weight:600}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px;margin-block:14px}
+.card>.hd{margin-bottom:12px}
+.sub{color:var(--muted);font-size:13px;margin:0}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-family:var(--f-m);letter-spacing:.03em;text-transform:uppercase;min-width:0}
+input,select,textarea{font:15px var(--f-b);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:8px 10px;min-width:0;width:100%}
+textarea{resize:vertical;min-height:64px}
+input[type=range]{padding:0;accent-color:var(--blue)}
+input[type=checkbox],input[type=radio]{width:auto;accent-color:var(--blue)}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+button{font:600 14px var(--f-b);border-radius:4px;padding:8px 14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+button:hover{border-color:var(--blue)}
+button.p{background:var(--blue);border-color:var(--blue);color:var(--surface)}
+html[data-theme=dark] button.p,:root:not([data-theme=light]) button.p{color:#0E1620}
+button.g{border-style:dashed;color:var(--blue)}
+button.x{padding:4px 9px;color:var(--muted)}
+button.arm{background:var(--bad);border-color:var(--bad);color:#fff}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:12px var(--f-m);padding:3px 9px;border-radius:99px;border:1px solid var(--line);background:var(--bg)}
+.chip.good{background:var(--good-soft);color:var(--good);border-color:transparent}
+.chip.warn{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+.chip.bad{background:var(--bad-soft);color:var(--bad);border-color:transparent}
+.chip.blue{background:var(--blue-soft);color:var(--blue);border-color:transparent}
+.item{display:grid;gap:8px;padding:10px 0;border-top:1px solid var(--line)}
+.item:first-child{border-top:0;padding-top:0}
+.note{border-left:3px solid var(--red);padding:6px 12px;background:var(--red-soft);font-size:13px;margin-block:10px}
+.sample{font:11px var(--f-m);color:var(--warn);background:var(--warn-soft);padding:2px 8px;border-radius:3px}
+.num{font-variant-numeric:tabular-nums;font-family:var(--f-m)}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--blue)}
+.quads{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:560px){.quads{grid-template-columns:1fr}}
+.quad{border:1px solid var(--line);border-radius:6px;padding:12px;min-height:130px;background:var(--bg)}
+.quad h3{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.quad ul{margin:8px 0 0;padding-left:18px}
+.quad li{margin-bottom:3px}
+.q-red{background:var(--red-soft);border-color:var(--red)}
+.q-blue{background:var(--blue-soft)}
+.q-good{background:var(--good-soft)}
+.q-warn{background:var(--warn-soft)}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{font:11px var(--f-m);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:500}
+.foot{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px;align-items:center}
+.foot .sub{flex:1 1 220px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:4px;font-size:13px;z-index:9}
+svg text{fill:var(--ink);font-family:var(--f-b)}
+.cp{width:100%;min-height:160px;font-family:var(--f-m);font-size:12px}
+
+.hero{padding-block:28px 8px}.hero h1{font-size:clamp(34px,7vw,60px);max-width:16ch}
+ol.list{list-style:none;padding:0;margin:22px 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:12px}
+.c{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px;display:flex;flex-direction:column;gap:6px}
+.c h2{font-size:18px}.c p{margin:0;color:var(--muted);font-size:14px;flex:1}.m{font:12px var(--f-m);color:var(--red);text-transform:uppercase;letter-spacing:.06em}
+.go{align-self:flex-start;font-weight:600;color:var(--blue);border-bottom:2px solid var(--red)}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:16px;margin-top:8px}.rules p{margin:0;font-size:14px}</style>
+<div class="wrap"><div class="top"><span>Programa anual</span><span>impactese</span></div>
+<div class="hero"><h1>Un año para planificar bien</h1><p class="lead">Doce herramientas, una por mes, para que tu fundación llegue al final del año con un plan y con activos que antes no tenía. Cada una la usás por tu cuenta, en unos 30 a 60 minutos.</p></div>
+<div class="rules"><p><b>Podés empezar cuando quieras.</b> El orden sugerido va de lo que decidís primero a lo que se apoya en eso, pero no hace falta seguir un mes por herramienta.</p><p><b>Tu trabajo es tuyo.</b> Se guarda en tu navegador y nadie más lo ve. Si querés comentarlo con nosotras, copiás el resumen y nos lo mandás.</p><p><b>Los ejemplos son ficticios.</b> Cada herramienta abre con datos de muestra marcados. Reemplazalos por los tuyos.</p></div>
+<ol class="list"><li class="c"><span class="m">Mes 1</span><h2>Matriz de prioridades</h2><p>Qué hacer ya, qué planificar, qué delegar y qué dejar ir.</p><a class="go" href="impactese-prioridades.html" >Abrir</a></li><li class="c"><span class="m">Mes 2</span><h2>Cartera BCG</h2><p>Qué programas invertir, sostener, cosechar o cerrar.</p><a class="go" href="impactese-bcg.html" >Abrir</a></li><li class="c"><span class="m">Mes 3</span><h2>Semáforo PESTEL</h2><p>Cómo te afecta el contexto político, económico, social, tecnológico, ambiental y legal.</p><a class="go" href="impactese-pestel.html" >Abrir</a></li><li class="c"><span class="m">Mes 4</span><h2>Mapa de stakeholders</h2><p>A quién dedicarle tiempo este año, según poder e interés.</p><a class="go" href="impactese-stakeholders.html" >Abrir</a></li><li class="c"><span class="m">Mes 5</span><h2>Identidad y posicionamiento</h2><p>Tu propósito, misión, visión o manifiesto, y el enunciado que guía lo que decís.</p><a class="go" href="impactese-identidad.html" >Abrir</a></li><li class="c"><span class="m">Mes 6</span><h2>Matriz de posicionamiento</h2><p>Dónde estás frente a tus alternativas reales y dónde hay espacio.</p><a class="go" href="impactese-matriz.html" >Abrir</a></li><li class="c"><span class="m">Mes 7</span><h2>Salud financiera</h2><p>Reservas, dependencia, fondos asegurados y peso de la estructura.</p><a class="go" href="impactese-finanzas.html" >Abrir</a></li><li class="c"><span class="m">Mes 8</span><h2>Auditoría digital</h2><p>Qué es tuyo, qué depende de una persona y qué está expuesto.</p><a class="go" href="impactese-digital.html" >Abrir</a></li><li class="c"><span class="m">Mes 9</span><h2>Calculadora de impacto</h2><p>Cuánto valor social genera cada peso, con su rango de fragilidad.</p><a class="go" href="impactese-roi.html" >Abrir</a></li><li class="c"><span class="m">Mes 10</span><h2>OKR y responsables</h2><p>Objetivos, resultados clave, responsables y cronograma.</p><a class="go" href="impactese-okr.html" >Abrir</a></li><li class="c"><span class="m">Mes 11</span><h2>Presupuesto anual</h2><p>Caja mes a mes y los baches que hay que cubrir.</p><a class="go" href="impactese-presupuesto.html" >Abrir</a></li><li class="c"><span class="m">Mes 12</span><h2>Plan estratégico</h2><p>Todo junto, con riesgos y los primeros 90 días.</p><a class="go" href="impactese-plan.html" >Abrir</a></li></ol></div>
+</body></html>

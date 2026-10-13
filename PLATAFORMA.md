@@ -1,0 +1,19 @@
+# Plataforma: cómo correrla
+
+```
+npm install
+npm run dev          # http://localhost:3000, login de prueba sin Google (DEV_LOGIN=1)
+```
+Producción: `GOOGLE_CLIENT_ID`, `SESSION_SECRET` (largo, aleatorio), `ADMIN_EMAILS` (tu mail, separados por coma), `NODE_ENV=production`, y opcional `DB_PATH`. Requiere Node >= 22.13 (usa `node:sqlite`).
+
+Google: en Google Cloud Console → Credenciales → ID de cliente OAuth (Aplicación web) → agregar tu dominio en "Orígenes autorizados de JavaScript". El `GOOGLE_CLIENT_ID` es público; no hay secreto de cliente en este flujo.
+
+## Flujo
+1. `/` login con Google. El mail tiene que estar en la lista de pagos (`/admin`: mails o `@dominio.org`). Se revalida en cada request.
+2. `/onboarding` (primera vez): del dominio del mail toma nombre, sitio, descripción y logos candidatos. La persona confirma, corrige o sube otro logo. Los 2 colores se sacan del logo en el navegador y se corrigen a mano (avisa si no llegan a contraste 4.5:1).
+3. `/app` índice con avance de los 12 pasos. `/tools/<id>` abre cada herramienta con logo y colores de la organización; guarda en servidor solo (700 ms después de cada cambio).
+
+## Decisiones tomadas por defecto (cambiables)
+- **Un espacio por dominio**: todos los de `@fundacion.org` comparten datos. Mails personales (gmail, etc.) tienen espacio propio y no se puede leer su sitio.
+- **Pago = lista manual** que cargás vos en `/admin`. No hay integración con Mercado Pago/Stripe.
+- Sin botón "Compartir con impactese" todavía (ver LEEME.md, punto 1).

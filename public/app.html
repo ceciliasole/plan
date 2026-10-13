@@ -1,0 +1,24 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tu plan · impactese</title><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="/static/core.css">
+<style>ol.list{list-style:none;padding:0;margin:22px 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:12px}
+.c{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px;display:flex;flex-direction:column;gap:6px}
+.c h2{font-size:18px}.c p{margin:0;color:var(--muted);font-size:14px;flex:1}.m{font:12px var(--f-m);color:var(--red);text-transform:uppercase;letter-spacing:.06em}
+.go{align-self:flex-start;font-weight:600;color:var(--blue);border-bottom:2px solid var(--red)}
+.who{display:flex;align-items:center;gap:12px}.who img{height:44px;max-width:160px;object-fit:contain}</style>
+<div class="wrap"><div class="top"><span id="mail"></span><span><a href="/onboarding">Datos de la organización</a> · <a href="#" id="out">Salir</a></span></div>
+<div class="who" style="margin-top:14px"><img id="logo" alt="" hidden><h1 id="org" style="margin:0"></h1></div>
+<p class="lead" id="prog"></p><ol class="list" id="list"></ol></div>
+<script>
+const DESC={prioridades:'Qué hacer ya, qué planificar, qué delegar y qué dejar ir.',bcg:'Qué programas invertir, sostener, cosechar o cerrar.',pestel:'Cómo te afecta el contexto político, económico, social, tecnológico, ambiental y legal.',stakeholders:'A quién dedicarle tiempo este año, según poder e interés.',identidad:'Tu propósito, misión, visión o manifiesto, y el enunciado que guía lo que decís.',matriz:'Dónde estás frente a tus alternativas reales y dónde hay espacio.',finanzas:'Reservas, dependencia, fondos asegurados y peso de la estructura.',digital:'Qué es tuyo, qué depende de una persona y qué está expuesto.',roi:'Cuánto valor social genera cada peso, con su rango de fragilidad.',okr:'Objetivos, resultados clave, responsables y cronograma.',presupuesto:'Caja mes a mes y los baches que hay que cubrir.',plan:'Todo junto, con riesgos y los primeros 90 días.'};
+const L={todo:'Sin empezar',started:'En curso',done:'Terminado'},K={todo:'',started:'warn',done:'good'};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+(async()=>{
+  const [me,pr]=await Promise.all([fetch('/api/me').then(r=>r.json()),fetch('/api/progress').then(r=>r.json())]);
+  mail.textContent=me.email;org.textContent=me.org.name;
+  if(me.org.logo){logo.src=me.org.logo;logo.hidden=false}
+  const d=pr.filter(p=>p.status==='done').length;
+  prog.textContent=d+' de 12 pasos terminados. Podés empezar por cualquiera; el orden sugerido va de lo que decidís primero a lo que se apoya en eso.';
+  list.innerHTML=pr.map(p=>'<li class="c"><span class="m">Paso '+p.mes+'</span><h2>'+esc(p.name)+'</h2><p>'+esc(DESC[p.id]||'')+'</p><div class="row"><a class="go" href="/tools/'+p.id+'">'+(p.status==='todo'?'Empezar':'Continuar')+'</a><span class="chip '+K[p.status]+'">'+L[p.status]+'</span></div></li>').join('');
+  out.onclick=async e=>{e.preventDefault();await fetch('/api/logout',{method:'POST'});location.href='/'};
+})();
+</script>

@@ -1,0 +1,17 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Clientes · impactese</title><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="/static/core.css">
+<div class="wrap"><div class="top"><span>Admin</span><a href="/app">Volver</a></div><h1>Quién pagó</h1>
+<p class="lead">Solo los mails o dominios de esta lista pueden entrar. Sacar uno corta el acceso en el próximo request.</p>
+<form class="card row" id="f"><input id="p" placeholder="ana@fundacion.org o @fundacion.org" required style="flex:2 1 240px"><input id="n" placeholder="nota (opcional)" style="flex:1 1 160px"><button class="p">Agregar</button></form>
+<p id="e" class="note" hidden></p>
+<div class="card scroll"><table><thead><tr><th>Mail o dominio</th><th>Nota</th><th>Alta</th><th></th></tr></thead><tbody id="t"></tbody></table></div></div>
+<script>
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+async function load(){const r=await (await fetch('/api/admin/customers')).json();
+  t.innerHTML=r.map(c=>'<tr><td>'+esc(c.pattern)+'</td><td>'+esc(c.note)+'</td><td>'+esc(c.created_at)+'</td><td><button class="x" data-p="'+esc(c.pattern)+'">Quitar</button></td></tr>').join('')||'<tr><td colspan=4 class="sub">Todavía no hay nadie.</td></tr>'}
+f.onsubmit=async ev=>{ev.preventDefault();const r=await fetch('/api/admin/customers',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({pattern:p.value,note:n.value})});
+  const j=await r.json();e.hidden=r.ok;e.textContent=j.error||'';if(r.ok){f.reset();load()}};
+t.onclick=async ev=>{const b=ev.target.closest('[data-p]');if(!b||!confirm('¿Quitar el acceso de '+b.dataset.p+'?'))return;
+  await fetch('/api/admin/customers',{method:'DELETE',headers:{'content-type':'application/json'},body:JSON.stringify({pattern:b.dataset.p})});load()};
+load();
+</script>

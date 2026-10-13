@@ -1,0 +1,151 @@
+<title>Matriz de prioridades</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>/* Layout: cuaderno de trabajo sobre papel cuadriculado; una columna de lectura, tableros que se ensanchan */
+:root{--bg:#EDF0F2;--surface:#FAFBFC;--ink:#1B2430;--muted:#59677A;--line:#CAD2DA;--blue:#24478F;--blue-soft:#DDE6F6;--red:#C8372D;--red-soft:#F8E1DE;--good:#2E7D5B;--good-soft:#DCEFE6;--warn:#B67A0C;--warn-soft:#F7ECCF;--bad:#C0392B;--bad-soft:#F6DEDA;--grid:rgba(36,71,143,.06);--f-d:'Bricolage Grotesque',system-ui,sans-serif;--f-b:'IBM Plex Sans',system-ui,sans-serif;--f-m:'IBM Plex Mono',ui-monospace,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#111820;--surface:#19222D;--ink:#E5EAF0;--muted:#92A0B1;--line:#2C3846;--blue:#8FB0F0;--blue-soft:#1F2D47;--red:#F0705F;--red-soft:#3A2321;--good:#5CC49A;--good-soft:#173328;--warn:#E3B04B;--warn-soft:#38301A;--bad:#EE7A6C;--bad-soft:#3A2321;--grid:rgba(143,176,240,.06);color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#111820;--surface:#19222D;--ink:#E5EAF0;--muted:#92A0B1;--line:#2C3846;--blue:#8FB0F0;--blue-soft:#1F2D47;--red:#F0705F;--red-soft:#3A2321;--good:#5CC49A;--good-soft:#173328;--warn:#E3B04B;--warn-soft:#38301A;--bad:#EE7A6C;--bad-soft:#3A2321;--grid:rgba(143,176,240,.06);color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-b);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px}
+.wrap{max-width:980px;margin:0 auto;padding-inline:16px;padding-block:20px 56px}
+.top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font:12px var(--f-m);color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.top a{color:var(--blue)}
+h1{font:700 clamp(28px,5vw,42px)/1.08 var(--f-d);margin:14px 0 8px;text-wrap:balance;letter-spacing:-.01em}
+h2{font:600 20px/1.2 var(--f-d);margin:0 0 4px;text-wrap:balance}
+h3{font:600 15px var(--f-b);margin:0}
+.lead{max-width:62ch;color:var(--muted);margin:0 0 6px}
+.how{display:flex;flex-wrap:wrap;gap:8px 18px;margin:14px 0 22px;font-size:13px;color:var(--muted)}
+.how b{color:var(--ink);font-weight:600}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px;margin-block:14px}
+.card>.hd{margin-bottom:12px}
+.sub{color:var(--muted);font-size:13px;margin:0}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-family:var(--f-m);letter-spacing:.03em;text-transform:uppercase;min-width:0}
+input,select,textarea{font:15px var(--f-b);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:8px 10px;min-width:0;width:100%}
+textarea{resize:vertical;min-height:64px}
+input[type=range]{padding:0;accent-color:var(--blue)}
+input[type=checkbox],input[type=radio]{width:auto;accent-color:var(--blue)}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+button{font:600 14px var(--f-b);border-radius:4px;padding:8px 14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+button:hover{border-color:var(--blue)}
+button.p{background:var(--blue);border-color:var(--blue);color:var(--surface)}
+html[data-theme=dark] button.p,:root:not([data-theme=light]) button.p{color:#0E1620}
+button.g{border-style:dashed;color:var(--blue)}
+button.x{padding:4px 9px;color:var(--muted)}
+button.arm{background:var(--bad);border-color:var(--bad);color:#fff}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:12px var(--f-m);padding:3px 9px;border-radius:99px;border:1px solid var(--line);background:var(--bg)}
+.chip.good{background:var(--good-soft);color:var(--good);border-color:transparent}
+.chip.warn{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+.chip.bad{background:var(--bad-soft);color:var(--bad);border-color:transparent}
+.chip.blue{background:var(--blue-soft);color:var(--blue);border-color:transparent}
+.item{display:grid;gap:8px;padding:10px 0;border-top:1px solid var(--line)}
+.item:first-child{border-top:0;padding-top:0}
+.note{border-left:3px solid var(--red);padding:6px 12px;background:var(--red-soft);font-size:13px;margin-block:10px}
+.sample{font:11px var(--f-m);color:var(--warn);background:var(--warn-soft);padding:2px 8px;border-radius:3px}
+.num{font-variant-numeric:tabular-nums;font-family:var(--f-m)}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--blue)}
+.quads{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:560px){.quads{grid-template-columns:1fr}}
+.quad{border:1px solid var(--line);border-radius:6px;padding:12px;min-height:130px;background:var(--bg)}
+.quad h3{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.quad ul{margin:8px 0 0;padding-left:18px}
+.quad li{margin-bottom:3px}
+.q-red{background:var(--red-soft);border-color:var(--red)}
+.q-blue{background:var(--blue-soft)}
+.q-good{background:var(--good-soft)}
+.q-warn{background:var(--warn-soft)}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{font:11px var(--f-m);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:500}
+.foot{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px;align-items:center}
+.foot .sub{flex:1 1 220px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:4px;font-size:13px;z-index:9}
+svg text{fill:var(--ink);font-family:var(--f-b)}
+.cp{width:100%;min-height:160px;font-family:var(--f-m);font-size:12px}
+.brand{display:inline-flex;align-items:center;gap:8px;margin-right:12px;color:var(--ink);font-weight:600}
+.brand .logo{height:26px;max-width:120px;object-fit:contain}
+#savestate{font-family:var(--f-m);font-size:12px}#savestate.bad{color:var(--bad)}
+.donechk{display:inline-flex;gap:6px;align-items:center;margin-left:12px;font-size:13px;flex-direction:row;text-transform:none;font-family:var(--f-b);letter-spacing:0}
+</style>
+<div id="root"></div>
+<script>window.INDEX_URL="";</script>
+<script>const TOOL={id:'prioridades',mes:1,title:'Matriz de prioridades',
+lead:'Volcá todo lo que hoy compite por tu tiempo y tu plata. Marcá qué es urgente y qué es importante. La matriz te dice qué hacer ya, qué planificar, qué delegar y qué dejar ir.',
+how:['<b>1.</b> Cargá entre 10 y 25 cosas','<b>2.</b> Marcá urgente e importante','<b>3.</b> Mirá el tablero y decidí'],
+blank:{items:{t:'',u:false,i:false,who:''}},
+init:()=>({items:[
+{t:'Renovar convenio con el municipio',u:true,i:true,who:'Dirección'},
+{t:'Responder consultas de redes todos los días',u:true,i:false,who:''},
+{t:'Armar plan de comunicación anual',u:false,i:true,who:''},
+{t:'Reunión semanal con todo el equipo',u:false,i:false,who:''}],ejemplo:true}),
+q(it){return it.u&&it.i?0:!it.u&&it.i?1:it.u&&!it.i?2:3},
+Q:[['Hacer ahora','Urgente e importante','q-red'],['Planificar','Importante, no urgente','q-blue'],['Delegar','Urgente, no importante','q-warn'],['Dejar ir','Ni urgente ni importante','']],
+view(){return `<div class="card"><div class="hd"><h2>Tus cosas pendientes</h2>${st.ejemplo?'<span class="sample">Ejemplos ficticios: reemplazalos por los tuyos</span>':''}</div>
+${st.items.map((it,k)=>`<div class="item"><div class="row"><div style="flex:1 1 220px">${inp('items.'+k+'.t',{ph:'Qué es'})}</div><div style="flex:0 1 160px">${inp('items.'+k+'.who',{ph:'Quién'})}</div>
+<label class="row"><input type="checkbox" data-b="items.${k}.u" ${it.u?'checked':''}> Urgente</label><label class="row"><input type="checkbox" data-b="items.${k}.i" ${it.i?'checked':''}> Importante</label>
+<button class="x" data-a="del" data-p="items" data-i="${k}" aria-label="Quitar">✕</button></div></div>`).join('')}
+<button class="g" data-a="add" data-p="items" style="margin-top:8px">+ Agregar</button></div><div id="out"></div>`},
+out(){const g=[[],[],[],[]];st.items.filter(i=>i.t.trim()).forEach(i=>g[this.q(i)].push(i));
+const warn=g[0].length>5?`<div class="note">Tenés ${g[0].length} cosas en “Hacer ahora”. Si todo es urgente, nada lo es. Revisá cuáles son urgentes por una fecha real y cuáles por costumbre.</div>`:'';
+const w=g[1].length<g[0].length?`<div class="note">Hay más cosas urgentes que planificadas. Eso suele indicar que la organización apaga incendios y no avanza en lo estratégico.</div>`:'';
+return `<div class="card"><div class="hd"><h2>Tu tablero</h2></div>${warn}${w}<div class="quads">${this.Q.map((q,k)=>`<div class="quad ${q[2]}"><h3>${q[0]}<span class="chip">${g[k].length}</span></h3><p class="sub">${q[1]}</p><ul>${g[k].map(i=>`<li>${esc(i.t)}${i.who?` <span class="sub">· ${esc(i.who)}</span>`:''}</li>`).join('')}</ul></div>`).join('')}</div></div>`},
+summary(){const g=[[],[],[],[]];st.items.filter(i=>i.t.trim()).forEach(i=>g[this.q(i)].push(i));return 'MATRIZ DE PRIORIDADES\n'+this.Q.map((q,k)=>`\n${q[0].toUpperCase()} (${q[1]})\n`+(g[k].map(i=>'- '+i.t+(i.who?' ['+i.who+']':'')).join('\n')||'- (vacío)')).join('\n')}};
+
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const KEY='impactese:'+TOOL.id;let st,mem=null;
+const IMP=window.IMP||null;let saveT,saving=false;
+function load(){if(IMP)return IMP.state;try{const v=localStorage.getItem(KEY);if(v)return JSON.parse(v)}catch(e){}return mem}
+function setSaveState(t,bad){const e=$('#savestate');if(e){e.textContent=t;e.classList.toggle('bad',!!bad)}}
+async function flush(){if(!IMP)return;saving=true;setSaveState('Guardando…');
+  try{const r=await fetch('/api/tools/'+TOOL.id,{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({state:st}),keepalive:true});
+    if(r.status===401){setSaveState('Tu sesión venció. Volvé a ingresar para guardar.',1);return}
+    if(!r.ok)throw 0;setSaveState('Guardado')}catch(e){setSaveState('No se pudo guardar. Reintentando…',1);saveT=setTimeout(flush,4000)}finally{saving=false}}
+function persist(){mem=st;if(IMP){clearTimeout(saveT);setSaveState('Sin guardar…');saveT=setTimeout(flush,700);return}try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
+addEventListener('beforeunload',e=>{if(IMP&&(saveT||saving)){clearTimeout(saveT);flush()}});
+const getp=p=>p.split('.').reduce((o,k)=>o?.[k],st);
+function setp(p,v){const k=p.split('.');let o=st;for(const x of k.slice(0,-1))o=o[x];o[k[k.length-1]]=v}
+const val=p=>esc(getp(p));
+const inp=(p,o={})=>`<input data-b="${p}" type="${o.t||'text'}" value="${val(p)}" ${o.ph?`placeholder="${esc(o.ph)}"`:''} ${o.min!=null?`min="${o.min}"`:''} ${o.max!=null?`max="${o.max}"`:''} ${o.step?`step="${o.step}"`:''} ${o.a||''}>`;
+const area=(p,ph='',rows=3)=>`<textarea data-b="${p}" rows="${rows}" placeholder="${esc(ph)}">${val(p)}</textarea>`;
+const sel=(p,opts,o={})=>`<select data-b="${p}" ${o.redraw?'data-redraw':''}>${opts.map(x=>{const [v,l]=Array.isArray(x)?x:[x,x];return `<option value="${esc(v)}" ${String(getp(p))===String(v)?'selected':''}>${esc(l)}</option>`}).join('')}</select>`;
+const rng=(p,min,max,step=1)=>`<input data-b="${p}" type="range" min="${min}" max="${max}" step="${step}" value="${val(p)}">`;
+const fld=(l,h)=>`<label class="f">${l}${h}</label>`;
+const fmt=n=>isFinite(n)?Math.round(n).toLocaleString('es-AR'):'—';
+const pct=n=>isFinite(n)?Math.round(n*100)+'%':'—';
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2200)}
+function draw(){
+  const a=document.activeElement,fb=a&&a.dataset&&a.dataset.b,ss=a&&a.selectionStart;
+  $('#app').innerHTML=TOOL.view();
+  if(TOOL.out)$('#out').innerHTML=TOOL.out();
+  if(fb){const e=$(`[data-b="${fb}"]`);if(e){e.focus();try{e.setSelectionRange(ss,ss)}catch(_){}}}
+}
+function upd(){if(TOOL.out&&$('#out'))$('#out').innerHTML=TOOL.out()}
+document.addEventListener('input',e=>{const el=e.target,p=el.dataset.b;if(!p)return;
+  let v=el.type==='checkbox'?el.checked:(el.type==='number'||el.type==='range')?(el.value===''?'':Number(el.value)):el.value;
+  setp(p,v);persist();if(el.type==='range'){const o=el.closest('label')?.querySelector('[data-v]');if(o)o.textContent=v}if(el.hasAttribute('data-redraw'))draw();else upd()});
+document.addEventListener('change',e=>{const el=e.target;if(el.hasAttribute&&el.hasAttribute('data-redraw')&&el.tagName==='SELECT'){draw()}});
+document.addEventListener('click',async e=>{const el=e.target.closest('[data-a]');if(!el)return;const a=el.dataset.a,p=el.dataset.p,i=el.dataset.i;
+  if(a==='add'){getp(p).push(JSON.parse(JSON.stringify(TOOL.blank[p])));persist();draw()}
+  else if(a==='del'){getp(p).splice(+i,1);persist();draw()}
+  else if(a==='copy'){const t=TOOL.summary();try{await navigator.clipboard.writeText(t);toast('Resumen copiado')}catch(_){const b=$('#cpbox');b.hidden=false;b.querySelector('textarea').value=t;b.querySelector('textarea').select()}}
+  else if(a==='save'){try{const d=await claude.use('downloads');if(!d)throw 0;await d.save({filename:'impactese-'+TOOL.id+'.txt',data:TOOL.summary()})}catch(_){const b=$('#cpbox');b.hidden=false;b.querySelector('textarea').value=TOOL.summary()}}
+  else if(a==='reset'){if(!el.classList.contains('arm')){el.classList.add('arm');el.textContent='Confirmar: borrar todo';setTimeout(()=>{el.classList.remove('arm');el.textContent='Empezar de cero'},4000)}else{st=TOOL.init();persist();draw()}}
+  else if(TOOL.act&&TOOL.act[a]){TOOL.act[a](p,i,el);persist();draw()}});
+function shell(){
+  const idx=(window.INDEX_URL||'');
+  const brand=IMP&&IMP.org?`<span class="brand">${IMP.org.logo?`<img src="${esc(IMP.org.logo)}" alt="" class="logo">`:''}${esc(IMP.org.name)}</span>`:'';
+  const note=IMP?`<span id="savestate" role="status">Guardado</span> <label class="donechk"><input type="checkbox" id="donechk" ${IMP.done?'checked':''}> Lo di por terminado</label>`:'Tu trabajo se guarda en este navegador. Nadie más lo ve. Si querés comentarlo con nosotras, copiá el resumen y pegalo en un mail.';
+  $('#root').innerHTML=`<div class="wrap"><div class="top"><span>${brand||''}Año de planificación · Mes ${TOOL.mes} de 12</span>${idx?`<a href="${idx}">Ver los 12 pasos</a>`:'<span>impactese</span>'}</div>
+  <h1>${TOOL.title}</h1><p class="lead">${TOOL.lead}</p><div class="how">${TOOL.how.map(h=>`<span>${h}</span>`).join('')}</div>
+  <div id="app"></div>
+  <div class="foot"><button class="p" data-a="copy">Copiar resumen</button><button data-a="save">Descargar</button><button data-a="reset">Empezar de cero</button><p class="sub">${note}</p></div>
+  <div id="cpbox" hidden class="card"><p class="sub">Seleccioná todo y copiá el texto:</p><textarea class="cp" readonly></textarea></div></div>`;
+}
+document.addEventListener('change',e=>{if(e.target.id==='donechk')fetch('/api/tools/'+TOOL.id+'/done',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({done:e.target.checked})})});
+st=load()||TOOL.init();if(TOOL.mig)TOOL.mig();shell();draw();
+</script>

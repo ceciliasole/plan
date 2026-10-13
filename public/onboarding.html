@@ -1,0 +1,57 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tu organización · impactese</title><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="/static/core.css">
+<style>.logos{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0}.lg{width:112px;height:84px;border:2px solid var(--line);border-radius:6px;background:#fff;display:grid;place-items:center;cursor:pointer;padding:6px}
+.lg img{max-width:100%;max-height:100%;object-fit:contain}.lg[aria-pressed=true]{border-color:var(--blue)}.sw{display:flex;gap:12px;flex-wrap:wrap}.sw label{flex-direction:row;align-items:center;gap:8px}.sw input{width:48px;height:34px;padding:2px}
+#st{min-height:1.4em}</style>
+<div class="wrap"><div class="top"><span id="mail"></span><a href="/app" id="back" hidden>Volver</a></div>
+<h1>Confirmá los datos de tu organización</h1>
+<p class="lead" id="lead">Buscando información en tu sitio…</p>
+<form id="f"><div class="card"><div class="grid2">
+<label class="f">Nombre<input id="name" required maxlength="120"></label>
+<label class="f">Sitio web<input id="website" type="url" placeholder="https://"></label></div>
+<label class="f" style="margin-top:12px">A qué se dedica<textarea id="description" rows="3" maxlength="600" placeholder="Una o dos frases"></textarea></label></div>
+<div class="card"><div class="hd"><h2>Logo</h2><p class="sub" id="lsub"></p></div>
+<div class="logos" id="logos"></div>
+<label class="f">Subir otro (PNG, JPG, SVG o WebP)<input type="file" id="file" accept="image/png,image/jpeg,image/svg+xml,image/webp"></label>
+<button type="button" class="g" id="nologo" style="margin-top:8px">Sin logo por ahora</button></div>
+<div class="card"><div class="hd"><h2>Colores</h2><p class="sub">Se usan en las 12 herramientas. Los sacamos del logo; podés cambiarlos.</p></div>
+<div class="sw"><label class="f">Principal<input type="color" id="c1" value="#24478F"></label><label class="f">Acento<input type="color" id="c2" value="#C8372D"></label></div>
+<p class="sub" id="contrast"></p></div>
+<div class="row"><button class="p">Confirmar y empezar</button><span id="st" class="sub" role="status"></span></div></form></div>
+<script>
+const $=s=>document.querySelector(s);let logo='',cands=[];
+const lum=h=>{const c=[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)/255).map(v=>v<=.03928?v/12.92:((v+.055)/1.055)**2.4);return .2126*c[0]+.7152*c[1]+.0722*c[2]};
+const ratio=(a,b)=>{const x=lum(a),y=lum(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05)};
+const hex=(r,g,b)=>'#'+[r,g,b].map(v=>Math.round(v).toString(16).padStart(2,'0')).join('');
+function darken(h){let c=[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));for(let i=0;i<30&&ratio(hex(...c),'#FAFBFC')<4.5;i++)c=c.map(v=>v*.92);return hex(...c)}
+function checkContrast(){const r1=ratio($('#c1').value,'#FAFBFC'),r2=ratio($('#c2').value,'#FAFBFC');
+  $('#contrast').textContent=(r1<4.5||r2<4.5)?'Atención: el color '+(r1<4.5?'principal':'de acento')+' tiene poco contraste con el fondo ('+Math.min(r1,r2).toFixed(1)+':1; el mínimo recomendado es 4.5:1). El texto puede ser difícil de leer.':'Contraste suficiente sobre fondo claro.'}
+function palette(src){return new Promise(ok=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(im,0,0,64,64);
+  let d;try{d=x.getImageData(0,0,64,64).data}catch{return ok([])}const m={};
+  for(let i=0;i<d.length;i+=4){const [r,g,b,a]=[d[i],d[i+1],d[i+2],d[i+3]];if(a<200)continue;const mx=Math.max(r,g,b),mn=Math.min(r,g,b);if(mx>235&&mn>215||mx<35||(mx-mn)<28)continue;const k=(r>>5)+','+(g>>5)+','+(b>>5);(m[k]??=[0,0,0,0]);m[k][0]++;m[k][1]+=r;m[k][2]+=g;m[k][3]+=b}
+  const top=Object.values(m).sort((p,q)=>q[0]-p[0]).map(v=>[v[1]/v[0],v[2]/v[0],v[3]/v[0]]);const out=[];
+  for(const c of top){if(out.every(o=>Math.hypot(o[0]-c[0],o[1]-c[1],o[2]-c[2])>90))out.push(c);if(out.length==2)break}ok(out.map(c=>hex(...c)))};im.onerror=()=>ok([]);im.src=src})}
+async function pick(src){logo=src;draw();if(!src)return;const p=await palette(src);if(p[0])$('#c1').value=darken(p[0]);if(p[1])$('#c2').value=darken(p[1]);checkContrast()}
+function draw(){$('#logos').innerHTML='';cands.forEach(s=>{const b=document.createElement('button');b.type='button';b.className='lg';b.setAttribute('aria-pressed',s===logo);b.title='Usar este logo';const i=document.createElement('img');i.src=s;i.alt='Logo candidato';b.append(i);b.onclick=()=>pick(s);$('#logos').append(b)});
+  $('#lsub').textContent=logo?'Logo elegido. ¿Es el correcto? Si no, elegí otro o subí uno.':cands.length?'Encontramos estos en tu sitio. ¿Cuál es el correcto?':'No encontramos un logo en tu sitio. Subí el tuyo.'}
+$('#file').onchange=async e=>{const f=e.target.files[0];if(!f)return;const st=$('#st');
+  if(!/^image\/(png|jpeg|svg\+xml|webp)$/.test(f.type))return st.textContent='Formato no admitido.';
+  const url=await new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(f)});
+  let out=url;
+  if(f.type!=='image/svg+xml'){out=await new Promise(r=>{const im=new Image();im.onload=()=>{const s=Math.min(1,512/im.width),c=document.createElement('canvas');c.width=im.width*s;c.height=im.height*s;c.getContext('2d').drawImage(im,0,0,c.width,c.height);r(c.toDataURL('image/png'))};im.src=url})}
+  if(out.length>900000)return st.textContent='El archivo es demasiado pesado (máx. ~700 KB).';
+  st.textContent='';cands=[out,...cands.filter(c=>c!==out)];pick(out)};
+$('#nologo').onclick=()=>{logo='';draw()};
+['#c1','#c2'].forEach(s=>$(s).oninput=checkContrast);
+$('#f').onsubmit=async e=>{e.preventDefault();$('#st').textContent='Guardando…';
+  const r=await fetch('/api/org',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({name:$('#name').value,website:$('#website').value,description:$('#description').value,logo,color1:$('#c1').value,color2:$('#c2').value})});
+  const j=await r.json();if(r.ok)location.href='/app';else $('#st').textContent=j.error||'No se pudo guardar.'};
+(async()=>{
+  const me=await (await fetch('/api/me')).json();$('#mail').textContent=me.email;const o=me.org;
+  if(o.confirmed){$('#back').hidden=false;['name','website','description'].forEach(k=>$('#'+k).value=o[k]||'');logo=o.logo;cands=logo?[logo]:[];if(o.color1)$('#c1').value=o.color1;if(o.color2)$('#c2').value=o.color2;$('#lead').textContent='Podés corregir lo que quieras.';draw();checkContrast();return}
+  const d=await (await fetch('/api/org/detect',{method:'POST'})).json();
+  $('#name').value=d.name||'';$('#website').value=d.website||'';$('#description').value=d.description||'';cands=d.logos||[];
+  $('#lead').textContent=d.publicMail?'Ingresaste con un mail personal, así que no podemos leer el sitio de tu organización. Completá los datos a mano.':d.found?'Tomamos esto del sitio de tu dominio. Revisá que sea tu organización y corregí lo que haga falta.':'No pudimos leer el sitio de tu dominio. Completá los datos a mano.';
+  draw();if(cands[0])pick(cands[0]);else checkContrast();
+})();
+</script>

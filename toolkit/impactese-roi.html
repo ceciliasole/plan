@@ -1,0 +1,148 @@
+<title>Calculadora de impacto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>/* Layout: cuaderno de trabajo sobre papel cuadriculado; una columna de lectura, tableros que se ensanchan */
+:root{--bg:#EDF0F2;--surface:#FAFBFC;--ink:#1B2430;--muted:#59677A;--line:#CAD2DA;--blue:#24478F;--blue-soft:#DDE6F6;--red:#C8372D;--red-soft:#F8E1DE;--good:#2E7D5B;--good-soft:#DCEFE6;--warn:#B67A0C;--warn-soft:#F7ECCF;--bad:#C0392B;--bad-soft:#F6DEDA;--grid:rgba(36,71,143,.06);--f-d:'Bricolage Grotesque',system-ui,sans-serif;--f-b:'IBM Plex Sans',system-ui,sans-serif;--f-m:'IBM Plex Mono',ui-monospace,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#111820;--surface:#19222D;--ink:#E5EAF0;--muted:#92A0B1;--line:#2C3846;--blue:#8FB0F0;--blue-soft:#1F2D47;--red:#F0705F;--red-soft:#3A2321;--good:#5CC49A;--good-soft:#173328;--warn:#E3B04B;--warn-soft:#38301A;--bad:#EE7A6C;--bad-soft:#3A2321;--grid:rgba(143,176,240,.06);color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#111820;--surface:#19222D;--ink:#E5EAF0;--muted:#92A0B1;--line:#2C3846;--blue:#8FB0F0;--blue-soft:#1F2D47;--red:#F0705F;--red-soft:#3A2321;--good:#5CC49A;--good-soft:#173328;--warn:#E3B04B;--warn-soft:#38301A;--bad:#EE7A6C;--bad-soft:#3A2321;--grid:rgba(143,176,240,.06);color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-b);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px}
+.wrap{max-width:980px;margin:0 auto;padding-inline:16px;padding-block:20px 56px}
+.top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font:12px var(--f-m);color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.top a{color:var(--blue)}
+h1{font:700 clamp(28px,5vw,42px)/1.08 var(--f-d);margin:14px 0 8px;text-wrap:balance;letter-spacing:-.01em}
+h2{font:600 20px/1.2 var(--f-d);margin:0 0 4px;text-wrap:balance}
+h3{font:600 15px var(--f-b);margin:0}
+.lead{max-width:62ch;color:var(--muted);margin:0 0 6px}
+.how{display:flex;flex-wrap:wrap;gap:8px 18px;margin:14px 0 22px;font-size:13px;color:var(--muted)}
+.how b{color:var(--ink);font-weight:600}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px;margin-block:14px}
+.card>.hd{margin-bottom:12px}
+.sub{color:var(--muted);font-size:13px;margin:0}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-family:var(--f-m);letter-spacing:.03em;text-transform:uppercase;min-width:0}
+input,select,textarea{font:15px var(--f-b);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:8px 10px;min-width:0;width:100%}
+textarea{resize:vertical;min-height:64px}
+input[type=range]{padding:0;accent-color:var(--blue)}
+input[type=checkbox],input[type=radio]{width:auto;accent-color:var(--blue)}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+button{font:600 14px var(--f-b);border-radius:4px;padding:8px 14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+button:hover{border-color:var(--blue)}
+button.p{background:var(--blue);border-color:var(--blue);color:var(--surface)}
+html[data-theme=dark] button.p,:root:not([data-theme=light]) button.p{color:#0E1620}
+button.g{border-style:dashed;color:var(--blue)}
+button.x{padding:4px 9px;color:var(--muted)}
+button.arm{background:var(--bad);border-color:var(--bad);color:#fff}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:12px var(--f-m);padding:3px 9px;border-radius:99px;border:1px solid var(--line);background:var(--bg)}
+.chip.good{background:var(--good-soft);color:var(--good);border-color:transparent}
+.chip.warn{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+.chip.bad{background:var(--bad-soft);color:var(--bad);border-color:transparent}
+.chip.blue{background:var(--blue-soft);color:var(--blue);border-color:transparent}
+.item{display:grid;gap:8px;padding:10px 0;border-top:1px solid var(--line)}
+.item:first-child{border-top:0;padding-top:0}
+.note{border-left:3px solid var(--red);padding:6px 12px;background:var(--red-soft);font-size:13px;margin-block:10px}
+.sample{font:11px var(--f-m);color:var(--warn);background:var(--warn-soft);padding:2px 8px;border-radius:3px}
+.num{font-variant-numeric:tabular-nums;font-family:var(--f-m)}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--blue)}
+.quads{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:560px){.quads{grid-template-columns:1fr}}
+.quad{border:1px solid var(--line);border-radius:6px;padding:12px;min-height:130px;background:var(--bg)}
+.quad h3{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.quad ul{margin:8px 0 0;padding-left:18px}
+.quad li{margin-bottom:3px}
+.q-red{background:var(--red-soft);border-color:var(--red)}
+.q-blue{background:var(--blue-soft)}
+.q-good{background:var(--good-soft)}
+.q-warn{background:var(--warn-soft)}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{font:11px var(--f-m);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:500}
+.foot{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px;align-items:center}
+.foot .sub{flex:1 1 220px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:4px;font-size:13px;z-index:9}
+svg text{fill:var(--ink);font-family:var(--f-b)}
+.cp{width:100%;min-height:160px;font-family:var(--f-m);font-size:12px}
+.brand{display:inline-flex;align-items:center;gap:8px;margin-right:12px;color:var(--ink);font-weight:600}
+.brand .logo{height:26px;max-width:120px;object-fit:contain}
+#savestate{font-family:var(--f-m);font-size:12px}#savestate.bad{color:var(--bad)}
+.donechk{display:inline-flex;gap:6px;align-items:center;margin-left:12px;font-size:13px;flex-direction:row;text-transform:none;font-family:var(--f-b);letter-spacing:0}
+</style>
+<div id="root"></div>
+<script>window.INDEX_URL="";</script>
+<script>const TOOL={id:'roi',mes:9,title:'Calculadora de impacto',
+lead:'Estimá cuánto valor social genera cada peso que invertís. Vos definís los resultados y cuánto vale cada uno. El cálculo descuenta lo que hubiera pasado igual y lo que se debe a otros, y te muestra qué tan frágil es el número.',
+how:['<b>1.</b> Cargá la inversión','<b>2.</b> Cargá resultados y su valor','<b>3.</b> Mirá el rango, no un número solo'],
+blank:{res:{n:'',q:0,v:0,f:''}},
+init:()=>({inv:5000000,dw:30,at:70,dr:25,años:3,td:10,res:[{n:'Personas que consiguen empleo (ficticio)',q:40,v:900000,f:'Salario anual promedio del sector (a verificar)'},{n:'Personas que mejoran su ingreso (ficticio)',q:80,v:150000,f:'Encuesta propia (a verificar)'}],ejemplo:true}),
+calc(dw,at){const b=st.res.reduce((s,r)=>s+(+r.q||0)*(+r.v||0),0);let pv=0,y=b*(1-dw/100)*(at/100);for(let t=0;t<(+st.años||1);t++){pv+=y/Math.pow(1+st.td/100,t);y*=(1-st.dr/100)}return {bruto:b,pv,ratio:st.inv?pv/st.inv:NaN}},
+view(){return `<div class="card"><div class="hd"><h2>Inversión y resultados</h2>${st.ejemplo?'<span class="sample">Cifras ficticias: reemplazalas con las tuyas</span>':''}</div>
+${fld('Inversión total en el período',inp('inv',{t:'number',min:0}))}
+<h3 style="margin:16px 0 8px">Resultados que produjo</h3>${st.res.map((r,k)=>`<div class="item"><div class="row"><div style="flex:1 1 220px">${inp('res.'+k+'.n',{ph:'Resultado'})}</div><div style="flex:0 1 110px">${inp('res.'+k+'.q',{t:'number',min:0,ph:'Cantidad'})}</div><div style="flex:0 1 150px">${inp('res.'+k+'.v',{t:'number',min:0,ph:'Valor por unidad'})}</div><button class="x" data-a="del" data-p="res" data-i="${k}" aria-label="Quitar">✕</button></div><div>${inp('res.'+k+'.f',{ph:'De dónde sale ese valor (fuente)'})}</div></div>`).join('')}
+<button class="g" data-a="add" data-p="res" style="margin-top:8px">+ Agregar resultado</button></div>
+<div class="card"><div class="hd"><h2>Supuestos</h2><p class="sub">Cuanto más honestos, más creíble el número ante un financiador.</p></div><div class="grid2">
+${fld('Lo que habría pasado igual: <b data-v>'+st.dw+'</b>%',rng('dw',0,90,5))}${fld('Parte que le corresponde a nuestro trabajo: <b data-v>'+st.at+'</b>%',rng('at',10,100,5))}${fld('Pérdida del efecto por año: <b data-v>'+st.dr+'</b>%',rng('dr',0,80,5))}${fld('Años que contás el efecto',inp('años',{t:'number',min:1,max:10}))}${fld('Tasa de descuento anual %',inp('td',{t:'number',min:0,max:50}))}</div></div><div id="out"></div>`},
+out(){const c=this.calc(st.dw,st.at);const dws=[0,20,40,60],ats=[40,60,80,100];
+return `<div class="card"><div class="hd"><h2>Resultado</h2></div><p style="font:700 34px var(--f-d);margin:0">${isFinite(c.ratio)?c.ratio.toFixed(1):'—'} <span class="sub" style="font:400 15px var(--f-b)">de valor social por cada $1 invertido</span></p>
+<p class="sub">Valor bruto del primer año $${fmt(c.bruto)}. Valor neto presente en ${st.años} año(s) $${fmt(c.pv)}.</p>
+<h3 style="margin:14px 0 6px">Qué tan frágil es: filas, “habría pasado igual”; columnas, parte atribuible</h3><div class="scroll"><table><tr><th></th>${ats.map(a=>`<th>${a}%</th>`).join('')}</tr>${dws.map(d=>`<tr><th>${d}%</th>${ats.map(a=>{const r=this.calc(d,a).ratio;return `<td class="num"><span class="chip ${r>=1?'good':'bad'}">${isFinite(r)?r.toFixed(1):'—'}</span></td>`}).join('')}</tr>`).join('')}</table></div>
+<div class="note">Presentá siempre el rango, no un número solo. El valor por unidad de cada resultado es la parte más discutible: anotá la fuente y verificala antes de mostrarlo afuera. Un ratio mayor a 1 indica que el valor estimado supera la inversión; no es una auditoría.</div></div>`},
+summary(){const c=this.calc(st.dw,st.at);return `CALCULADORA DE IMPACTO\nInversión $${fmt(st.inv)}\nSupuestos: habría pasado igual ${st.dw}%, atribución ${st.at}%, pérdida anual ${st.dr}%, ${st.años} años, descuento ${st.td}%\nRatio: ${isFinite(c.ratio)?c.ratio.toFixed(1):'—'} por cada $1\nResultados:\n`+st.res.map(r=>`- ${r.n}: ${r.q} × $${fmt(r.v)} (${r.f||'sin fuente'})`).join('\n')}};
+
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const KEY='impactese:'+TOOL.id;let st,mem=null;
+const IMP=window.IMP||null;let saveT,saving=false;
+function load(){if(IMP)return IMP.state;try{const v=localStorage.getItem(KEY);if(v)return JSON.parse(v)}catch(e){}return mem}
+function setSaveState(t,bad){const e=$('#savestate');if(e){e.textContent=t;e.classList.toggle('bad',!!bad)}}
+async function flush(){if(!IMP)return;saving=true;setSaveState('Guardando…');
+  try{const r=await fetch('/api/tools/'+TOOL.id,{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({state:st}),keepalive:true});
+    if(r.status===401){setSaveState('Tu sesión venció. Volvé a ingresar para guardar.',1);return}
+    if(!r.ok)throw 0;setSaveState('Guardado')}catch(e){setSaveState('No se pudo guardar. Reintentando…',1);saveT=setTimeout(flush,4000)}finally{saving=false}}
+function persist(){mem=st;if(IMP){clearTimeout(saveT);setSaveState('Sin guardar…');saveT=setTimeout(flush,700);return}try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
+addEventListener('beforeunload',e=>{if(IMP&&(saveT||saving)){clearTimeout(saveT);flush()}});
+const getp=p=>p.split('.').reduce((o,k)=>o?.[k],st);
+function setp(p,v){const k=p.split('.');let o=st;for(const x of k.slice(0,-1))o=o[x];o[k[k.length-1]]=v}
+const val=p=>esc(getp(p));
+const inp=(p,o={})=>`<input data-b="${p}" type="${o.t||'text'}" value="${val(p)}" ${o.ph?`placeholder="${esc(o.ph)}"`:''} ${o.min!=null?`min="${o.min}"`:''} ${o.max!=null?`max="${o.max}"`:''} ${o.step?`step="${o.step}"`:''} ${o.a||''}>`;
+const area=(p,ph='',rows=3)=>`<textarea data-b="${p}" rows="${rows}" placeholder="${esc(ph)}">${val(p)}</textarea>`;
+const sel=(p,opts,o={})=>`<select data-b="${p}" ${o.redraw?'data-redraw':''}>${opts.map(x=>{const [v,l]=Array.isArray(x)?x:[x,x];return `<option value="${esc(v)}" ${String(getp(p))===String(v)?'selected':''}>${esc(l)}</option>`}).join('')}</select>`;
+const rng=(p,min,max,step=1)=>`<input data-b="${p}" type="range" min="${min}" max="${max}" step="${step}" value="${val(p)}">`;
+const fld=(l,h)=>`<label class="f">${l}${h}</label>`;
+const fmt=n=>isFinite(n)?Math.round(n).toLocaleString('es-AR'):'—';
+const pct=n=>isFinite(n)?Math.round(n*100)+'%':'—';
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2200)}
+function draw(){
+  const a=document.activeElement,fb=a&&a.dataset&&a.dataset.b,ss=a&&a.selectionStart;
+  $('#app').innerHTML=TOOL.view();
+  if(TOOL.out)$('#out').innerHTML=TOOL.out();
+  if(fb){const e=$(`[data-b="${fb}"]`);if(e){e.focus();try{e.setSelectionRange(ss,ss)}catch(_){}}}
+}
+function upd(){if(TOOL.out&&$('#out'))$('#out').innerHTML=TOOL.out()}
+document.addEventListener('input',e=>{const el=e.target,p=el.dataset.b;if(!p)return;
+  let v=el.type==='checkbox'?el.checked:(el.type==='number'||el.type==='range')?(el.value===''?'':Number(el.value)):el.value;
+  setp(p,v);persist();if(el.type==='range'){const o=el.closest('label')?.querySelector('[data-v]');if(o)o.textContent=v}if(el.hasAttribute('data-redraw'))draw();else upd()});
+document.addEventListener('change',e=>{const el=e.target;if(el.hasAttribute&&el.hasAttribute('data-redraw')&&el.tagName==='SELECT'){draw()}});
+document.addEventListener('click',async e=>{const el=e.target.closest('[data-a]');if(!el)return;const a=el.dataset.a,p=el.dataset.p,i=el.dataset.i;
+  if(a==='add'){getp(p).push(JSON.parse(JSON.stringify(TOOL.blank[p])));persist();draw()}
+  else if(a==='del'){getp(p).splice(+i,1);persist();draw()}
+  else if(a==='copy'){const t=TOOL.summary();try{await navigator.clipboard.writeText(t);toast('Resumen copiado')}catch(_){const b=$('#cpbox');b.hidden=false;b.querySelector('textarea').value=t;b.querySelector('textarea').select()}}
+  else if(a==='save'){try{const d=await claude.use('downloads');if(!d)throw 0;await d.save({filename:'impactese-'+TOOL.id+'.txt',data:TOOL.summary()})}catch(_){const b=$('#cpbox');b.hidden=false;b.querySelector('textarea').value=TOOL.summary()}}
+  else if(a==='reset'){if(!el.classList.contains('arm')){el.classList.add('arm');el.textContent='Confirmar: borrar todo';setTimeout(()=>{el.classList.remove('arm');el.textContent='Empezar de cero'},4000)}else{st=TOOL.init();persist();draw()}}
+  else if(TOOL.act&&TOOL.act[a]){TOOL.act[a](p,i,el);persist();draw()}});
+function shell(){
+  const idx=(window.INDEX_URL||'');
+  const brand=IMP&&IMP.org?`<span class="brand">${IMP.org.logo?`<img src="${esc(IMP.org.logo)}" alt="" class="logo">`:''}${esc(IMP.org.name)}</span>`:'';
+  const note=IMP?`<span id="savestate" role="status">Guardado</span> <label class="donechk"><input type="checkbox" id="donechk" ${IMP.done?'checked':''}> Lo di por terminado</label>`:'Tu trabajo se guarda en este navegador. Nadie más lo ve. Si querés comentarlo con nosotras, copiá el resumen y pegalo en un mail.';
+  $('#root').innerHTML=`<div class="wrap"><div class="top"><span>${brand||''}Año de planificación · Mes ${TOOL.mes} de 12</span>${idx?`<a href="${idx}">Ver los 12 pasos</a>`:'<span>impactese</span>'}</div>
+  <h1>${TOOL.title}</h1><p class="lead">${TOOL.lead}</p><div class="how">${TOOL.how.map(h=>`<span>${h}</span>`).join('')}</div>
+  <div id="app"></div>
+  <div class="foot"><button class="p" data-a="copy">Copiar resumen</button><button data-a="save">Descargar</button><button data-a="reset">Empezar de cero</button><p class="sub">${note}</p></div>
+  <div id="cpbox" hidden class="card"><p class="sub">Seleccioná todo y copiá el texto:</p><textarea class="cp" readonly></textarea></div></div>`;
+}
+document.addEventListener('change',e=>{if(e.target.id==='donechk')fetch('/api/tools/'+TOOL.id+'/done',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({done:e.target.checked})})});
+st=load()||TOOL.init();if(TOOL.mig)TOOL.mig();shell();draw();
+</script>
