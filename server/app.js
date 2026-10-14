@@ -139,6 +139,10 @@ app.delete('/api/admin/customers', requireUser, requireAdmin, async (req, res) =
 
 // ---------- Páginas ----------
 const page = f => (_q, res) => res.sendFile(f, { root: join(ROOT, 'public') });
+// Páginas legales: públicas (Google las pide para publicar la app) y con el mail de contacto configurable.
+const legal = f => (_q, res) => res.type('html').send(readFileSync(join(ROOT, 'public', f), 'utf8').replaceAll('{{CONTACT}}', process.env.CONTACT_EMAIL || 'cecilia.sole@gmail.com'));
+app.get('/privacidad', legal('privacidad.html'));
+app.get('/terminos', legal('terminos.html'));
 app.get('/', page('login.html'));
 app.get('/onboarding', requireUser, async (req, res, next) => (req.user.paid ? next() : res.redirect('/app')), page('onboarding.html'));
 app.get('/app', requireUser, async (req, res, next) => (!req.user.paid || (await getOrg(orgIdFor(req.user.email))).confirmed ? page('app.html')(req, res) : res.redirect('/onboarding')));
