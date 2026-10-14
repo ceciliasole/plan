@@ -72,6 +72,7 @@ svg text{fill:var(--ink);font-family:var(--f-b)}
 .donechk{display:inline-flex;gap:6px;align-items:center;margin-left:12px;font-size:13px;flex-direction:row;text-transform:none;font-family:var(--f-b);letter-spacing:0}
 button:disabled,input:disabled,select:disabled,textarea:disabled{opacity:.5;cursor:not-allowed;filter:grayscale(1)}
 [hidden]{display:none!important}
+input.ej,textarea.ej,select.ej{font-style:italic;color:var(--muted)}
 </style>
 <div id="root"></div>
 <script>window.INDEX_URL="";</script>
@@ -123,18 +124,29 @@ const fmt=n=>isFinite(n)?Math.round(n).toLocaleString('es-AR'):'—';
 const pct=n=>isFinite(n)?Math.round(n*100)+'%':'—';
 function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2200)}
 const RO=!!(window.IMP&&window.IMP.readonly);
+// Ejemplos: las filas y valores que vienen de fábrica se ven en cursiva hasta que la persona escribe en ellos.
+// Mientras sigan así no cuentan para el plan estratégico (ver 12-plan.js).
+const isO=o=>o&&typeof o==='object';
+function markEx(o){if(Array.isArray(o))o.forEach(x=>{if(isO(x)&&!Array.isArray(x))x._ej=true;markEx(x)});else if(isO(o))for(const k in o)markEx(o[k])}
+function hasEx(o){return Array.isArray(o)?o.some(x=>(isO(x)&&x._ej)||hasEx(x)):isO(o)?Object.values(o).some(hasEx):false}
+function initEx(){markEx(st);st._exf=Object.keys(st).filter(k=>k!=='ejemplo'&&k[0]!=='_'&&(typeof st[k]==='number'||(typeof st[k]==='string'&&st[k])));st._exf0=st._exf.length;st._hasEx=hasEx(st)||st._exf.length>0}
+function exAt(p){let o=st;for(const x of p.split('.')){if(!isO(o))break;if(o._ej)return true;o=o[x]}return(isO(o)&&o._ej)||(st._exf||[]).includes(p)}
+function clearEx(p){let o=st;for(const x of p.split('.')){if(!isO(o))break;if(o._ej)delete o._ej;o=o[x]}if(isO(o)&&o._ej)delete o._ej;if(st._exf){const i=st._exf.indexOf(p);if(i>=0)st._exf.splice(i,1)}}
+function markDom(){document.querySelectorAll('#app [data-b]').forEach(e=>e.classList.toggle('ej',!!exAt(e.dataset.b)))}
+document.addEventListener('focusin',e=>{const el=e.target;if(el.classList&&el.classList.contains('ej')&&el.select&&!['range','checkbox','date'].includes(el.type))try{el.select()}catch(_){}});
 function lock(){if(RO)document.querySelectorAll('#root input,#root select,#root textarea,#root button').forEach(e=>e.disabled=true)}
 function draw(){
+  if('ejemplo' in st)st.ejemplo=hasEx(st)||!!(st._exf&&st._exf.length);
   const a=document.activeElement,fb=a&&a.dataset&&a.dataset.b,ss=a&&a.selectionStart;
   $('#app').innerHTML=TOOL.view();
   if(TOOL.out)$('#out').innerHTML=TOOL.out();
   if(fb){const e=$(`[data-b="${fb}"]`);if(e){e.focus();try{e.setSelectionRange(ss,ss)}catch(_){}}}
-  lock();
+  lock();markDom();
 }
 function upd(){if(TOOL.out&&$('#out'))$('#out').innerHTML=TOOL.out()}
 document.addEventListener('input',e=>{const el=e.target,p=el.dataset.b;if(!p||RO)return;
   let v=el.type==='checkbox'?el.checked:(el.type==='number'||el.type==='range')?(el.value===''?'':Number(el.value)):el.value;
-  setp(p,v);persist();if(el.type==='range'){const o=el.closest('label')?.querySelector('[data-v]');if(o)o.textContent=v}if(el.hasAttribute('data-redraw'))draw();else upd()});
+  setp(p,v);clearEx(p);persist();if(el.type==='range'){const o=el.closest('label')?.querySelector('[data-v]');if(o)o.textContent=v}if(el.hasAttribute('data-redraw'))draw();else{upd();markDom()}});
 document.addEventListener('change',e=>{const el=e.target;if(el.hasAttribute&&el.hasAttribute('data-redraw')&&el.tagName==='SELECT'){draw()}});
 document.addEventListener('click',async e=>{const el=e.target.closest('[data-a]');if(!el||RO)return;const a=el.dataset.a,p=el.dataset.p,i=el.dataset.i;
   if(a==='add'){getp(p).push(JSON.parse(JSON.stringify(TOOL.blank[p])));persist();draw()}
@@ -156,5 +168,5 @@ function shell(){
   <div id="cpbox" hidden class="card"><p class="sub">Seleccioná todo y copiá el texto:</p><textarea class="cp" readonly></textarea></div></div>`;
 }
 document.addEventListener('change',e=>{if(e.target.id==='donechk')fetch('/api/tools/'+TOOL.id+'/done',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({done:e.target.checked})})});
-st=load()||TOOL.init();if(TOOL.mig)TOOL.mig();shell();draw();
+const loaded=load();st=loaded||TOOL.init();if(!loaded)initEx();if(TOOL.mig)TOOL.mig();shell();draw();
 </script>
