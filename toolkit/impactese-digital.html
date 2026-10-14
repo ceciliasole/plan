@@ -134,7 +134,7 @@ document.addEventListener('click',async e=>{const el=e.target.closest('[data-a]'
   if(a==='add'){getp(p).push(JSON.parse(JSON.stringify(TOOL.blank[p])));persist();draw()}
   else if(a==='del'){getp(p).splice(+i,1);persist();draw()}
   else if(a==='copy'){const t=TOOL.summary();try{await navigator.clipboard.writeText(t);toast('Resumen copiado')}catch(_){const b=$('#cpbox');b.hidden=false;b.querySelector('textarea').value=t;b.querySelector('textarea').select()}}
-  else if(a==='save'){try{const d=await claude.use('downloads');if(!d)throw 0;await d.save({filename:'impactese-'+TOOL.id+'.txt',data:TOOL.summary()})}catch(_){const b=$('#cpbox');b.hidden=false;b.querySelector('textarea').value=TOOL.summary()}}
+  else if(a==='save'){try{const d=await claude.use('downloads');if(!d)throw 0;await d.save({filename:'plan-'+TOOL.id+'.txt',data:TOOL.summary()})}catch(_){const b=$('#cpbox');b.hidden=false;b.querySelector('textarea').value=TOOL.summary()}}
   else if(a==='reset'){if(!el.classList.contains('arm')){el.classList.add('arm');el.textContent='Confirmar: borrar todo';setTimeout(()=>{el.classList.remove('arm');el.textContent='Empezar de cero'},4000)}else{st=TOOL.init();persist();draw()}}
   else if(TOOL.act&&TOOL.act[a]){TOOL.act[a](p,i,el);persist();draw()}});
 function shell(){
@@ -143,7 +143,7 @@ function shell(){
   const pay=RO?(IMP.pay.url?`<a href="${esc(IMP.pay.url)}">activá tu inscripción</a>`:`escribinos a <a href="mailto:${esc(IMP.pay.contact)}">${esc(IMP.pay.contact)}</a> para activar tu inscripción`):'';
   const banner=RO?`<div class="note" role="status"><b>Vista previa.</b> Estos son datos de ejemplo y no se puede editar ni guardar. Para completar esta herramienta, ${pay}.</div>`:'';
   const note=RO?'Vista previa, sin guardado.':IMP?`<span id="savestate" role="status">Guardado</span> <label class="donechk"><input type="checkbox" id="donechk" ${IMP.done?'checked':''}> Lo di por terminado</label>`:'Tu trabajo se guarda en este navegador. Nadie más lo ve. Si querés comentarlo con nosotras, copiá el resumen y pegalo en un mail.';
-  $('#root').innerHTML=`<div class="wrap"><div class="top"><span>${brand||''}Año de planificación · Mes ${TOOL.mes} de 12</span>${idx?`<a href="${idx}">Ver los 12 pasos</a>`:'<span>impactese</span>'}</div>
+  $('#root').innerHTML=`<div class="wrap"><div class="top"><span>${brand||''}Paso ${TOOL.mes} de 12</span>${idx?`<a href="${idx}">Ver los 12 pasos</a>`:''}</div>
   ${banner}<h1>${TOOL.title}</h1><p class="lead">${TOOL.lead}</p><div class="how">${TOOL.how.map(h=>`<span>${h}</span>`).join('')}</div>
   <div id="app"></div>
   <div class="foot"><button class="p" data-a="copy">Copiar resumen</button><button data-a="save">Descargar</button><button data-a="reset">Empezar de cero</button><p class="sub">${note}</p></div>

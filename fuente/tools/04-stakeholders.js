@@ -1,5 +1,5 @@
 const TOOL={id:'stakeholders',mes:4,title:'Mapa de stakeholders',
-lead:'Listá las personas y organizaciones que pueden ayudarte o frenarte. Ubicalas por poder e interés. El mapa te dice a quién dedicarle tiempo este año.',
+lead:'Listá las personas y organizaciones que pueden ayudarte o frenarte. Ubicalas por poder e interés. El mapa te dice a quién dedicarle tiempo.',
 how:['<b>1.</b> Agregá actores','<b>2.</b> Puntuá poder e interés de 1 a 5','<b>3.</b> Escribí el próximo paso'],
 G:['Destinatarios','Financiadores','Aliados y redes','Estado','Equipo y gobierno interno','Medios y opinión pública'],
 A:['A favor','Neutral','En contra','No sé'],
