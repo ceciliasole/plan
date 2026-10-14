@@ -1,6 +1,6 @@
 import 'express-async-errors';
 import express from 'express';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { q, one, orgIdFor } from './db.js';
@@ -109,6 +109,16 @@ app.get('/tools/:id', requireUser, async (req, res) => {
     const row = await one('SELECT json,done FROM impactese_tool_state WHERE org_id=$1 AND tool_id=$2', [orgId, id]);
     imp = { id, state: row?.json ? JSON.parse(row.json) : null, done: !!row?.done, org: { name: org.name, logo: org.logo } };
     css = brandCss(org);
+    if (id === 'plan') {
+      // El plan junta lo trabajado en los otros pasos: manda el código y el estado de cada uno que ya tenga datos.
+      const rows = await q("SELECT tool_id,json FROM impactese_tool_state WHERE org_id=$1 AND json IS NOT NULL AND tool_id<>'plan'", [orgId]);
+      const files = readdirSync(join(ROOT, 'fuente/tools'));
+      imp.others = {};
+      for (const r of rows) {
+        const f = files.find(n => n.replace(/^\d+-/, '').replace(/\.js$/, '') === r.tool_id);
+        if (f) imp.others[r.tool_id] = { src: readFileSync(join(ROOT, 'fuente/tools', f), 'utf8'), state: JSON.parse(r.json) };
+      }
+    }
   }
   // </ evitado para que el JSON no pueda cerrar el <script>
   const boot = `<script>window.IMP=${JSON.stringify(imp).replace(/</g, '\\u003c')};window.INDEX_URL='/app';</script>`;
