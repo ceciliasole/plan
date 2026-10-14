@@ -3,10 +3,10 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=22.13"
+    "node": "22.x"
   },
   "scripts": {
-    "build": "cd fuente && mkdir -p out && python3 build.py && cp out/*.html ../toolkit/",
+    "build:toolkit": "cd fuente && mkdir -p out && python3 build.py && cp out/*.html ../toolkit/",
     "start": "node server/index.js",
     "dev": "DEV_LOGIN=1 ADMIN_EMAILS=${ADMIN_EMAILS:-admin@example.org} node server/index.js"
   },
