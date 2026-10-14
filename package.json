@@ -2,7 +2,9 @@
   "name": "impactese-plataforma",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=22.13" },
+  "engines": {
+    "node": ">=22.13"
+  },
   "scripts": {
     "build": "cd fuente && mkdir -p out && python3 build.py && cp out/*.html ../toolkit/",
     "start": "node server/index.js",
@@ -10,6 +12,11 @@
   },
   "dependencies": {
     "express": "^4.21.2",
-    "google-auth-library": "^9.15.1"
+    "express-async-errors": "^3.1.1",
+    "google-auth-library": "^9.15.1",
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "pg-mem": "^3.0.14"
   }
 }

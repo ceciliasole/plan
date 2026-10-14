@@ -39,14 +39,14 @@ export async function verifyGoogle(credential) {
 
 // Cualquier cuenta de Google verificada entra. El pago decide si puede usar el programa (paid) o solo mirarlo.
 // Se re-chequea en cada request: si lo revocás, vuelve a modo vista previa al instante.
-export function requireUser(req, res, next) {
+export async function requireUser(req, res, next) {
   const email = readCookie(req);
   if (!email) {
     if (req.accepts('html') && !req.path.startsWith('/api/')) return res.redirect('/');
     return res.status(401).json({ error: 'no_session' });
   }
   const admin = ADMINS.includes(email);
-  req.user = { email, admin, paid: admin || isPaid(email) };
+  req.user = { email, admin, paid: admin || await isPaid(email) };
   next();
 }
 export const requirePaid = (req, res, next) =>

@@ -4,7 +4,10 @@
 npm install
 npm run dev          # http://localhost:3000, login de prueba sin Google (DEV_LOGIN=1)
 ```
-Producción: `GOOGLE_CLIENT_ID`, `SESSION_SECRET` (largo, aleatorio), `ADMIN_EMAILS` (tu mail, separados por coma), `NODE_ENV=production`, y opcional `DB_PATH`, `PAY_URL` (link de inscripción/pago que se muestra en la vista previa) y `CONTACT_EMAIL`. Requiere Node >= 22.13 (usa `node:sqlite`).
+Producción: `DATABASE_URL` (Supabase: Project Settings → Database → Connection string → *Transaction pooler*), `GOOGLE_CLIENT_ID`, `SESSION_SECRET` (largo, aleatorio), `ADMIN_EMAILS` (tu mail, separados por coma), `NODE_ENV=production`, y opcional `PAY_URL` (link de inscripción/pago que se muestra en la vista previa) y `CONTACT_EMAIL`. Requiere Node >= 22.13. Sin `DATABASE_URL` en desarrollo usa una base en memoria que se borra al apagar.
+
+## Base de datos (Supabase)
+Las tablas se crean solas al arrancar, con prefijo `impactese_` (`impactese_customers`, `impactese_orgs`, `impactese_tool_state`) para no pisar otras tablas del proyecto. En Supabase quedan con RLS activado y sin políticas: la API pública no puede leerlas; el servidor entra por la conexión directa de Postgres. La contraseña de `DATABASE_URL` es secreta: va solo en las variables de entorno del servidor, nunca en el repositorio.
 
 Google: en Google Cloud Console → Credenciales → ID de cliente OAuth (Aplicación web) → agregar tu dominio en "Orígenes autorizados de JavaScript". El `GOOGLE_CLIENT_ID` es público; no hay secreto de cliente en este flujo.
 
