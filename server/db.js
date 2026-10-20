@@ -4,7 +4,13 @@ import pg from 'pg';
 // Desarrollo sin DATABASE_URL: Postgres en memoria (pg-mem), se borra al apagar.
 let pool;
 if (process.env.DATABASE_URL) {
-  pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false }, max: process.env.VERCEL ? 1 : 5 });
+  pool = new pg.Pool({
+    connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false },
+    max: process.env.VERCEL ? 1 : 5,
+    connectionTimeoutMillis: 8000, idleTimeoutMillis: 10000,
+  });
+  // Sin este listener, una conexión inactiva que el pooler corta tira abajo todo el proceso (en Vercel: error 500 hasta el próximo arranque).
+  pool.on('error', e => console.error('Conexión inactiva con error (se ignora):', e.message));
 } else if (process.env.NODE_ENV === 'production') {
   throw new Error('Falta DATABASE_URL');
 } else {
@@ -17,25 +23,29 @@ export const q = async (sql, params = []) => (await pool.query(sql, params)).row
 export const one = async (sql, params = []) => (await q(sql, params))[0];
 
 // Prefijo impactese_ para convivir con otras tablas del mismo proyecto (por ejemplo, las de horas).
-await q(`CREATE TABLE IF NOT EXISTS impactese_customers(
+// Si falla (base caída un instante), no tira abajo el sitio: se reintenta en el próximo arranque y cada consulta devuelve su propio error.
+async function initSchema() {
+  await q(`CREATE TABLE IF NOT EXISTS impactese_customers(
   pattern TEXT PRIMARY KEY,
   note TEXT DEFAULT '',
   created_at TIMESTAMPTZ DEFAULT now())`);
-await q(`CREATE TABLE IF NOT EXISTS impactese_orgs(
+  await q(`CREATE TABLE IF NOT EXISTS impactese_orgs(
   id TEXT PRIMARY KEY,
   name TEXT DEFAULT '', website TEXT DEFAULT '', description TEXT DEFAULT '',
   logo TEXT DEFAULT '', color1 TEXT DEFAULT '', color2 TEXT DEFAULT '',
   confirmed INTEGER DEFAULT 0,
   updated_at TIMESTAMPTZ DEFAULT now())`);
-await q(`CREATE TABLE IF NOT EXISTS impactese_tool_state(
+  await q(`CREATE TABLE IF NOT EXISTS impactese_tool_state(
   org_id TEXT, tool_id TEXT, json TEXT, done INTEGER DEFAULT 0,
   updated_at TIMESTAMPTZ DEFAULT now(),
   PRIMARY KEY(org_id, tool_id))`);
-// Supabase expone las tablas por su API pública. Con RLS activado y sin políticas, esa API no deja leer ni escribir nada;
-// este servidor entra con la conexión directa de Postgres, que no pasa por RLS.
-if (process.env.DATABASE_URL) {
-  for (const t of ['customers', 'orgs', 'tool_state']) await q(`ALTER TABLE impactese_${t} ENABLE ROW LEVEL SECURITY`);
+  // Supabase expone las tablas por su API pública. Con RLS activado y sin políticas, esa API no deja leer ni escribir nada;
+  // este servidor entra con la conexión directa de Postgres, que no pasa por RLS.
+  if (process.env.DATABASE_URL) {
+    for (const t of ['customers', 'orgs', 'tool_state']) await q(`ALTER TABLE impactese_${t} ENABLE ROW LEVEL SECURITY`);
+  }
 }
+await initSchema().catch(e => console.error('No se pudo preparar el esquema:', e.message));
 
 export const PUBLIC_DOMAINS = new Set(['gmail.com', 'googlemail.com', 'hotmail.com', 'outlook.com', 'live.com', 'yahoo.com', 'yahoo.com.ar', 'icloud.com', 'me.com', 'proton.me', 'protonmail.com']);
 
