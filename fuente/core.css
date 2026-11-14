@@ -28,7 +28,8 @@ input[type=checkbox],input[type=radio]{width:auto;accent-color:var(--blue)}
 button{font:600 14px var(--f-b);border-radius:4px;padding:8px 14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
 button:hover{border-color:var(--blue)}
 button.p{background:var(--blue);border-color:var(--blue);color:var(--surface)}
-html[data-theme=dark] button.p,:root:not([data-theme=light]) button.p{color:#0E1620}
+html[data-theme=dark] button.p{color:#0E1620}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) button.p{color:#0E1620}}
 button.g{border-style:dashed;color:var(--blue)}
 button.x{padding:4px 9px;color:var(--muted)}
 button.arm{background:var(--bad);border-color:var(--bad);color:#fff}

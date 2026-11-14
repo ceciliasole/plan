@@ -190,6 +190,7 @@ app.get('/', page('login.html'));
 app.get('/onboarding', requireUser, async (req, res, next) => (req.user.paid ? next() : res.redirect('/app')), page('onboarding.html'));
 app.get('/app', requireUser, async (req, res, next) => (!req.user.paid || (await getOrg(req.user.orgId)).confirmed ? page('app.html')(req, res) : res.redirect('/onboarding')));
 app.get('/admin', requireUser, requireAdmin, page('admin.html'));
+app.use('/static/marca', express.static(join(ROOT, 'fuente', 'marca'), { maxAge: '1d' }));
 app.get('/static/core.css', (_q, res) => res.sendFile('fuente/core.css', { root: ROOT }));
 
 app.use((err, _q, res, _n) => { console.error(err); res.status(500).json({ error: 'Error del servidor' }); });
