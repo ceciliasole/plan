@@ -23,8 +23,8 @@ const $=s=>document.querySelector(s);let logo='',cands=[];
 const lum=h=>{const c=[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)/255).map(v=>v<=.03928?v/12.92:((v+.055)/1.055)**2.4);return .2126*c[0]+.7152*c[1]+.0722*c[2]};
 const ratio=(a,b)=>{const x=lum(a),y=lum(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05)};
 const hex=(r,g,b)=>'#'+[r,g,b].map(v=>Math.round(v).toString(16).padStart(2,'0')).join('');
-function darken(h){let c=[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));for(let i=0;i<30&&ratio(hex(...c),'#FAFBFC')<4.5;i++)c=c.map(v=>v*.92);return hex(...c)}
-function checkContrast(){const r1=ratio($('#c1').value,'#FAFBFC'),r2=ratio($('#c2').value,'#FAFBFC');
+function darken(h){let c=[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));for(let i=0;i<30&&ratio(hex(...c),'#FAFAF9')<4.5;i++)c=c.map(v=>v*.92);return hex(...c)}
+function checkContrast(){const r1=ratio($('#c1').value,'#FAFAF9'),r2=ratio($('#c2').value,'#FAFAF9');
   $('#contrast').textContent=(r1<4.5||r2<4.5)?'Atención: el color '+(r1<4.5?'principal':'de acento')+' tiene poco contraste con el fondo ('+Math.min(r1,r2).toFixed(1)+':1; el mínimo recomendado es 4.5:1). El texto puede ser difícil de leer.':'Contraste suficiente sobre fondo claro.'}
 function palette(src){return new Promise(ok=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(im,0,0,64,64);
   let d;try{d=x.getImageData(0,0,64,64).data}catch{return ok([])}const m={};

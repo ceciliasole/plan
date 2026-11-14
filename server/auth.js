@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { OAuth2Client } from 'google-auth-library';
-import { isPaid } from './db.js';
+import { isPaid, one, orgIdFor } from './db.js';
 
 const SECRET = process.env.SESSION_SECRET || (process.env.NODE_ENV === 'production' ? null : 'dev-secret');
 if (!SECRET) throw new Error('Falta SESSION_SECRET');
@@ -28,7 +28,9 @@ function readCookie(req) {
 }
 export const setSession = (res, email) =>
   res.setHeader('Set-Cookie', `sid=${makeCookie(email)}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${TTL / 1000}${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`);
-export const clearSession = res => res.setHeader('Set-Cookie', 'sid=; HttpOnly; Path=/; Max-Age=0');
+export const clearSession = res => res.setHeader('Set-Cookie', ['sid=; HttpOnly; Path=/; Max-Age=0', 'org=; HttpOnly; Path=/; Max-Age=0']);
+export const setActiveOrg = (res, orgId) =>
+  res.append('Set-Cookie', `org=${encodeURIComponent(orgId)}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${TTL / 1000}${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`);
 
 export async function verifyGoogle(credential) {
   const t = await google.verifyIdToken({ idToken: credential, audience: CLIENT_ID });
@@ -46,7 +48,16 @@ export async function requireUser(req, res, next) {
     return res.status(401).json({ error: 'no_session' });
   }
   const admin = ADMINS.includes(email);
-  req.user = { email, admin, paid: admin || await isPaid(email) };
+  // Organización activa: la del dominio, salvo que la cookie `org` apunte a otra donde la persona es miembro.
+  // Se valida en cada request: ser admin no da acceso a los datos de otras organizaciones (cada una decide a quién invita).
+  const own = orgIdFor(email);
+  let orgId = own;
+  const want = /(?:^|;\s*)org=([^;]+)/.exec(req.headers.cookie || '')?.[1];
+  if (want) {
+    let w = ''; try { w = decodeURIComponent(want); } catch {}
+    if (w && w !== own && await one('SELECT 1 AS x FROM impactese_members WHERE email=$1 AND org_id=$2', [email, w])) orgId = w;
+  }
+  req.user = { email, admin, paid: admin || await isPaid(email), orgId, ownOrg: own };
   next();
 }
 export const requirePaid = (req, res, next) =>
