@@ -1,12 +1,51 @@
 <!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Ingresar</title><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="/static/core.css">
-<style>.box{max-width:460px;margin:12vh auto 0}#msg{margin-top:14px}</style>
-<div class="wrap"><div class="box"><div class="top"><span>Plan estratégico</span></div>
-<h1>Armá el plan estratégico de tu organización</h1>
-<p class="lead">Ingresá con tu cuenta de Google. Podés recorrer las 12 herramientas para ver qué hace cada una; para completarlas y guardar tu plan necesitás la inscripción.</p>
-<div class="card"><div id="g"></div>
-<form id="dev" hidden class="row" style="margin-top:12px"><input id="devmail" type="email" placeholder="mail (solo modo desarrollo)" required><button class="p">Entrar</button></form>
-<p id="msg" class="note" hidden role="alert"></p></div><p class="sub" style="margin-top:14px"><a href="/privacidad">Privacidad</a> · <a href="/terminos">Condiciones</a></p></div></div>
+<title>Ingresar · Plan estratégico</title><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="/static/core.css">
+<style>
+body{background:var(--bg);margin:0}
+.split{min-height:100vh;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}
+.brandside{position:relative;background:#0F3B4F;color:#FAFAF9;padding:clamp(28px,5vw,64px);display:flex;flex-direction:column;justify-content:space-between;gap:48px;overflow:hidden}
+.brandside::before{content:"";position:absolute;right:-18%;bottom:-22%;width:78%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 35% 35%,#F18A00 0%,#F0243E 62%,transparent 63%);opacity:.92}
+.brandside::after{content:"";position:absolute;right:9%;top:16%;width:13%;aspect-ratio:1;border-radius:50%;background:#87D1E6;opacity:.95}
+.brandside>*{position:relative;z-index:1}
+.logos{display:flex;align-items:center;gap:22px}
+.logos img{display:block}
+.logos .g{height:38px}.logos .i{height:26px}
+.logos .div{width:1px;height:34px;background:rgba(250,250,249,.35)}
+.kicker{font:12px var(--f-m);letter-spacing:.12em;text-transform:uppercase;color:#87D1E6;margin:0 0 18px}
+.brandside h1{font:600 clamp(40px,5.6vw,76px)/1.0 var(--f-d);letter-spacing:-.015em;margin:0;max-width:11ch;color:#FAFAF9}
+.brandside h1 em{font-style:italic;font-weight:500;color:#F6A93B}
+.brandside .lead{color:#C9D8DF;max-width:38ch;margin:22px 0 0;font-size:16px}
+.bar{width:72px;height:5px;border-radius:3px;background:linear-gradient(90deg,#F18A00,#F0243E);margin-top:28px}
+.formside{display:flex;align-items:center;justify-content:center;padding:clamp(24px,5vw,64px)}
+.box{width:100%;max-width:400px}
+.box h2{font:600 34px/1.1 var(--f-d);margin:0 0 8px;color:#0F3B4F}
+.box p.sub{margin:0 0 22px;font-size:14.5px}
+.box .card{padding:22px;margin:0;border-radius:10px;border-color:#CFD6D6}
+.legal{margin-top:20px;font-size:13px;color:var(--muted)}
+.legal a{color:#0F3B4F;text-decoration:underline;text-decoration-color:#F18A00;text-underline-offset:3px}
+.legal a:hover{color:#B85600}
+@media(max-width:820px){.split{grid-template-columns:1fr}.brandside{min-height:46vh;padding-bottom:36px}.brandside::before{width:110%;right:-40%;bottom:-48%}.brandside::after{display:none}}
+@media (prefers-color-scheme:dark){.formside{background:var(--bg)}.box h2{color:var(--ink)}.legal a{color:var(--blue)}}
+</style>
+<div class="split">
+  <aside class="brandside">
+    <div class="logos" aria-label="Guaraní Agency e impactese"><img class="g" src="/static/marca/guarani-blanco.png" alt="Guaraní Agency"><span class="div"></span><img class="i" src="/static/marca/impactese-blanco.png" alt="impactese"></div>
+    <div>
+      <p class="kicker">Plan estratégico</p>
+      <h1>El plan de tu organización, <em>en tus manos</em></h1>
+      <p class="lead">Doce herramientas para pensar, decidir y dejar escrito hacia dónde va tu organización.</p>
+      <div class="bar"></div>
+    </div>
+  </aside>
+  <main class="formside"><div class="box">
+    <h2>Ingresá</h2>
+    <p class="sub">Con tu cuenta de Google. Podés recorrer las 12 herramientas para ver qué hace cada una; para completarlas y guardar tu plan necesitás la inscripción.</p>
+    <div class="card"><div id="g"></div>
+    <form id="dev" hidden class="row" style="margin-top:12px"><input id="devmail" type="email" placeholder="mail (solo modo desarrollo)" required><button class="p">Entrar</button></form>
+    <p id="msg" class="note" hidden role="alert"></p></div>
+    <p class="legal"><a href="/privacidad">Privacidad</a> · <a href="/terminos">Condiciones</a></p>
+  </div></main>
+</div>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
 const msg=t=>{const m=document.getElementById('msg');m.textContent=t;m.hidden=!t};
