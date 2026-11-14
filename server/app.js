@@ -3,8 +3,8 @@ import express from 'express';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
-import { q, one, orgIdFor } from './db.js';
-import { CLIENT_ID, requireUser, requirePaid, requireAdmin, setSession, clearSession, verifyGoogle } from './auth.js';
+import { q, one, orgIdFor, orgsFor, PUBLIC_DOMAINS } from './db.js';
+import { CLIENT_ID, requireUser, requirePaid, requireAdmin, setSession, clearSession, setActiveOrg, verifyGoogle } from './auth.js';
 import { detectOrg, LOGO_RE } from './org.js';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
@@ -41,18 +41,61 @@ app.post('/api/logout', (_q, res) => { clearSession(res); res.json({ ok: true })
 
 // ---------- Sesión, organización ----------
 app.get('/api/me', requireUser, async (req, res) => {
-  const orgId = orgIdFor(req.user.email);
-  res.json({ email: req.user.email, admin: req.user.admin, paid: req.user.paid, org: await getOrg(orgId), domain: req.user.email.split('@')[1], publicMail: orgId === req.user.email });
+  const orgId = req.user.orgId;
+  res.json({ email: req.user.email, admin: req.user.admin, paid: req.user.paid, org: await getOrg(orgId), orgId, domain: req.user.email.split('@')[1], publicMail: orgId === req.user.email });
+});
+
+// ---------- Varias organizaciones ----------
+const DOMAIN = /^(?=.{3,253}$)[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/;
+const orgList = async email => Promise.all((await orgsFor(email)).map(async id => { const o = await getOrg(id); return { id, name: o.name || (id.includes('@') ? 'Mi espacio personal' : id), logo: o.logo, confirmed: !!o.confirmed }; }));
+
+app.get('/api/orgs', requireUser, async (req, res) => res.json({ active: req.user.orgId, own: req.user.ownOrg, orgs: await orgList(req.user.email) }));
+
+app.post('/api/orgs/active', requireUser, async (req, res) => {
+  const id = String(req.body?.id || '');
+  if (!(await orgsFor(req.user.email)).includes(id)) return res.status(403).json({ error: 'No tenés acceso a esa organización.' });
+  setActiveOrg(res, id);
+  res.json({ ok: true, active: id });
+});
+
+// Sumar una organización donde trabajás (por ejemplo, la de un cliente). Si ya existe y tiene datos, hay que pedir que te inviten.
+app.post('/api/orgs', requireUser, requirePaid, async (req, res) => {
+  const domain = mapMail(req.body?.domain).replace(/^@/, '');
+  if (!DOMAIN.test(domain) || PUBLIC_DOMAINS.has(domain)) return res.status(400).json({ error: 'Usá el dominio de la organización, por ejemplo fundacion.org.' });
+  const mine = await orgsFor(req.user.email);
+  if (!mine.includes(domain)) {
+    const used = await one('SELECT 1 AS x FROM impactese_orgs WHERE id=$1 AND confirmed=1 UNION SELECT 1 FROM impactese_tool_state WHERE org_id=$1 UNION SELECT 1 FROM impactese_members WHERE org_id=$1', [domain]);
+    if (used) return res.status(409).json({ error: 'Esa organización ya existe. Pedile a alguien de ahí que te invite desde su cuenta.' });
+    await q('INSERT INTO impactese_orgs(id) VALUES($1) ON CONFLICT(id) DO NOTHING', [domain]);
+    await q('INSERT INTO impactese_members(email,org_id,added_by) VALUES($1,$2,$1) ON CONFLICT DO NOTHING', [req.user.email, domain]);
+  }
+  setActiveOrg(res, domain);
+  res.json({ ok: true, active: domain, orgs: await orgList(req.user.email) });
+});
+
+// Quién trabaja en la organización activa además del equipo del dominio. Cualquier miembro puede invitar o quitar.
+app.get('/api/org/members', requireUser, requirePaid, async (req, res) =>
+  res.json(await q('SELECT email,added_by,created_at FROM impactese_members WHERE org_id=$1 ORDER BY created_at', [req.user.orgId])));
+app.post('/api/org/members', requireUser, requirePaid, async (req, res) => {
+  const email = mapMail(req.body?.email);
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return res.status(400).json({ error: 'Escribí un mail válido.' });
+  if (orgIdFor(email) === req.user.orgId) return res.status(400).json({ error: 'Esa persona ya es parte del equipo de esta organización.' });
+  await q('INSERT INTO impactese_members(email,org_id,added_by) VALUES($1,$2,$3) ON CONFLICT DO NOTHING', [email, req.user.orgId, req.user.email]);
+  res.json({ ok: true });
+});
+app.delete('/api/org/members', requireUser, requirePaid, async (req, res) => {
+  await q('DELETE FROM impactese_members WHERE email=$1 AND org_id=$2', [mapMail(req.body?.email), req.user.orgId]);
+  res.json({ ok: true });
 });
 
 app.post('/api/org/detect', requireUser, requirePaid, async (req, res) => {
-  const orgId = orgIdFor(req.user.email);
-  if (orgId === req.user.email) return res.json({ found: false, publicMail: true, logos: [] });
+  const orgId = req.user.orgId;
+  if (orgId.includes('@')) return res.json({ found: false, publicMail: true, logos: [] });
   res.json(await detectOrg(orgId));
 });
 
 app.put('/api/org', requireUser, requirePaid, async (req, res) => {
-  const b = req.body || {}, orgId = orgIdFor(req.user.email);
+  const b = req.body || {}, orgId = req.user.orgId;
   const name = String(b.name || '').trim().slice(0, 120);
   if (!name) return res.status(400).json({ error: 'Falta el nombre de la organización.' });
   const logo = String(b.logo || '');
@@ -68,7 +111,7 @@ app.put('/api/org', requireUser, requirePaid, async (req, res) => {
 
 // ---------- Herramientas ----------
 app.get('/api/progress', requireUser, async (req, res) => {
-  const rows = req.user.paid ? await q('SELECT tool_id,done,updated_at FROM impactese_tool_state WHERE org_id=$1', [orgIdFor(req.user.email)]) : [];
+  const rows = req.user.paid ? await q('SELECT tool_id,done,updated_at FROM impactese_tool_state WHERE org_id=$1', [req.user.orgId]) : [];
   const by = Object.fromEntries(rows.map(r => [r.tool_id, r]));
   res.json(TOOLS.map((id, i) => ({ id, mes: i + 1, name: META[id].name, status: by[id]?.done ? 'done' : by[id] ? 'started' : 'todo', updated_at: by[id]?.updated_at || null })));
 });
@@ -78,13 +121,13 @@ app.put('/api/tools/:id', requireUser, requirePaid, async (req, res) => {
   const json = JSON.stringify(req.body?.state ?? null);
   if (json.length > 900_000) return res.status(413).json({ error: 'Demasiado grande' });
   await q(`INSERT INTO impactese_tool_state(org_id,tool_id,json) VALUES($1,$2,$3) ON CONFLICT(org_id,tool_id) DO UPDATE SET json=excluded.json,updated_at=now()`,
-    [orgIdFor(req.user.email), req.params.id, json]);
+    [req.user.orgId, req.params.id, json]);
   res.json({ ok: true, at: new Date().toISOString() });
 });
 app.put('/api/tools/:id/done', requireUser, requirePaid, async (req, res) => {
   if (!TOOLS.includes(req.params.id)) return res.status(404).end();
   await q(`INSERT INTO impactese_tool_state(org_id,tool_id,json,done) VALUES($1,$2,NULL,$3) ON CONFLICT(org_id,tool_id) DO UPDATE SET done=excluded.done`,
-    [orgIdFor(req.user.email), req.params.id, req.body?.done ? 1 : 0]);
+    [req.user.orgId, req.params.id, req.body?.done ? 1 : 0]);
   res.json({ ok: true });
 });
 
@@ -99,7 +142,7 @@ const brandCss = o => {
 app.get('/tools/:id', requireUser, async (req, res) => {
   const { id } = req.params, file = join(ROOT, `toolkit/impactese-${id}.html`);
   if (!TOOLS.includes(id) || !existsSync(file)) return res.status(404).send('No existe');
-  const orgId = orgIdFor(req.user.email), org = await getOrg(orgId);
+  const orgId = req.user.orgId, org = await getOrg(orgId);
   let imp, css = '';
   if (!req.user.paid) {
     // Vista previa: datos de ejemplo, sin tocar lo guardado, todo deshabilitado.
@@ -145,7 +188,7 @@ app.get('/privacidad', legal('privacidad.html'));
 app.get('/terminos', legal('terminos.html'));
 app.get('/', page('login.html'));
 app.get('/onboarding', requireUser, async (req, res, next) => (req.user.paid ? next() : res.redirect('/app')), page('onboarding.html'));
-app.get('/app', requireUser, async (req, res, next) => (!req.user.paid || (await getOrg(orgIdFor(req.user.email))).confirmed ? page('app.html')(req, res) : res.redirect('/onboarding')));
+app.get('/app', requireUser, async (req, res, next) => (!req.user.paid || (await getOrg(req.user.orgId)).confirmed ? page('app.html')(req, res) : res.redirect('/onboarding')));
 app.get('/admin', requireUser, requireAdmin, page('admin.html'));
 app.get('/static/core.css', (_q, res) => res.sendFile('fuente/core.css', { root: ROOT }));
 

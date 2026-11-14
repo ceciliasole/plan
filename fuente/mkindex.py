@@ -15,7 +15,7 @@ P=[('prioridades','Matriz de prioridades','Qué hacer ya, qué planificar, qué 
 css=open('core.css').read()
 cards=''.join(f'<li class="c"><span class="m">Mes {i+1}</span><h2>{n}</h2><p>{d}</p>'+(f'<a class="go" href="{urls[k]}" target="_blank" rel="noopener">Abrir</a>' if k in urls else '<span class="sub">próximamente</span>')+'</li>' for i,(k,n,d) in enumerate(P))
 html=f'''<title>Un año de planificación</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>{css}
 .hero{{padding-block:28px 8px}}.hero h1{{font-size:clamp(34px,7vw,60px);max-width:16ch}}
 ol.list{{list-style:none;padding:0;margin:22px 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:12px}}

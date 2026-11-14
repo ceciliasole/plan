@@ -8,6 +8,9 @@ CREATE TABLE IF NOT EXISTS impactese_orgs(
 CREATE TABLE IF NOT EXISTS impactese_tool_state(
   org_id TEXT, tool_id TEXT, json TEXT, done INTEGER DEFAULT 0,
   updated_at TIMESTAMPTZ DEFAULT now(), PRIMARY KEY(org_id, tool_id));
+CREATE TABLE IF NOT EXISTS impactese_members(
+  email TEXT, org_id TEXT, added_by TEXT DEFAULT '', created_at TIMESTAMPTZ DEFAULT now(), PRIMARY KEY(email, org_id));
 ALTER TABLE impactese_customers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE impactese_orgs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE impactese_tool_state ENABLE ROW LEVEL SECURITY;
+ALTER TABLE impactese_members ENABLE ROW LEVEL SECURITY;

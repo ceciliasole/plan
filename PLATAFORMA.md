@@ -19,4 +19,5 @@ Google: en Google Cloud Console → Credenciales → ID de cliente OAuth (Aplica
 ## Decisiones tomadas por defecto (cambiables)
 - **Un espacio por dominio**: todos los de `@fundacion.org` comparten datos. Mails personales (gmail, etc.) tienen espacio propio y no se puede leer su sitio.
 - **Pago = lista manual** que cargás vos en `/admin`. No hay integración con Mercado Pago/Stripe.
+- **Varias organizaciones por persona**: además de la organización de su dominio, alguien puede sumar otras (consultoras, quien asesora a varias fundaciones). En `/app`, "Agregar organización" crea una por dominio y "Invitar a alguien" suma a una persona a la organización activa; el selector cambia entre ellas. Ser admin **no** da acceso a los datos de otras organizaciones: cada una decide a quién invita. Si una organización ya tiene datos, hay que pedir que te inviten. Tabla `impactese_members` (email, org_id).
 - Sin botón "Compartir con impactese" todavía (ver LEEME.md, punto 1).

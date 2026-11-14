@@ -39,10 +39,16 @@ async function initSchema() {
   org_id TEXT, tool_id TEXT, json TEXT, done INTEGER DEFAULT 0,
   updated_at TIMESTAMPTZ DEFAULT now(),
   PRIMARY KEY(org_id, tool_id))`);
+  // Una persona puede trabajar en más de una organización (consultoras, auditoras, quien asesora a varias fundaciones).
+  // Además de la organización de su dominio, se suma una fila por cada organización a la que la invitaron o que ella creó.
+  await q(`CREATE TABLE IF NOT EXISTS impactese_members(
+  email TEXT, org_id TEXT, added_by TEXT DEFAULT '',
+  created_at TIMESTAMPTZ DEFAULT now(),
+  PRIMARY KEY(email, org_id))`);
   // Supabase expone las tablas por su API pública. Con RLS activado y sin políticas, esa API no deja leer ni escribir nada;
   // este servidor entra con la conexión directa de Postgres, que no pasa por RLS.
   if (process.env.DATABASE_URL) {
-    for (const t of ['customers', 'orgs', 'tool_state']) await q(`ALTER TABLE impactese_${t} ENABLE ROW LEVEL SECURITY`);
+    for (const t of ['customers', 'orgs', 'tool_state', 'members']) await q(`ALTER TABLE impactese_${t} ENABLE ROW LEVEL SECURITY`);
   }
 }
 await initSchema().catch(e => console.error('No se pudo preparar el esquema:', e.message));
@@ -55,3 +61,9 @@ export const orgIdFor = email => {
 };
 
 export const isPaid = async email => !!(await one('SELECT 1 AS x FROM impactese_customers WHERE pattern IN ($1,$2)', [email, '@' + email.split('@')[1]]));
+
+// Organizaciones donde esta persona puede trabajar: la de su dominio (o su mail, si es personal) más las que se le sumaron.
+export const orgsFor = async email => {
+  const extra = await q('SELECT org_id FROM impactese_members WHERE email=$1 ORDER BY created_at', [email]);
+  return [...new Set([orgIdFor(email), ...extra.map(r => r.org_id)])];
+};
