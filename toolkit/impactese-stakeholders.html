@@ -1,16 +1,16 @@
 <title>Mapa de stakeholders</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>/* Layout: cuaderno de trabajo sobre papel cuadriculado; una columna de lectura, tableros que se ensanchan */
-:root{--bg:#EDF0F2;--surface:#FAFBFC;--ink:#1B2430;--muted:#59677A;--line:#CAD2DA;--blue:#24478F;--blue-soft:#DDE6F6;--red:#C8372D;--red-soft:#F8E1DE;--good:#2E7D5B;--good-soft:#DCEFE6;--warn:#B67A0C;--warn-soft:#F7ECCF;--bad:#C0392B;--bad-soft:#F6DEDA;--grid:rgba(36,71,143,.06);--f-d:'Bricolage Grotesque',system-ui,sans-serif;--f-b:'IBM Plex Sans',system-ui,sans-serif;--f-m:'IBM Plex Mono',ui-monospace,monospace}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#111820;--surface:#19222D;--ink:#E5EAF0;--muted:#92A0B1;--line:#2C3846;--blue:#8FB0F0;--blue-soft:#1F2D47;--red:#F0705F;--red-soft:#3A2321;--good:#5CC49A;--good-soft:#173328;--warn:#E3B04B;--warn-soft:#38301A;--bad:#EE7A6C;--bad-soft:#3A2321;--grid:rgba(143,176,240,.06);color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#111820;--surface:#19222D;--ink:#E5EAF0;--muted:#92A0B1;--line:#2C3846;--blue:#8FB0F0;--blue-soft:#1F2D47;--red:#F0705F;--red-soft:#3A2321;--good:#5CC49A;--good-soft:#173328;--warn:#E3B04B;--warn-soft:#38301A;--bad:#EE7A6C;--bad-soft:#3A2321;--grid:rgba(143,176,240,.06);color-scheme:dark}
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>/* Layout: papel liso, una columna de lectura, tableros que se ensanchan. Look conjunto Guaraní + impactese: base petróleo y papel, acento naranja, celeste de puente */
+:root{--bg:#FAFAF9;--surface:#FFFFFF;--ink:#111B22;--muted:#54687A;--line:#DADEDC;--blue:#0F3B4F;--blue-soft:#E6EEF2;--red:#B85600;--red-soft:#FDF0E1;--good:#2E7D5B;--good-soft:#DCEFE6;--warn:#B67A0C;--warn-soft:#F7ECCF;--bad:#C0392B;--bad-soft:#F6DEDA;--grid:transparent;--f-d:'Cormorant Garamond',Georgia,serif;--f-b:'DM Sans',system-ui,sans-serif;--f-m:'DM Mono',ui-monospace,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0A1F29;--surface:#102F3E;--ink:#E8EEF1;--muted:#9DB0BC;--line:#25485A;--blue:#87D1E6;--blue-soft:#17404F;--red:#F18A00;--red-soft:#3A2A14;--good:#5CC49A;--good-soft:#173328;--warn:#E3B04B;--warn-soft:#38301A;--bad:#EE7A6C;--bad-soft:#3A2321;--grid:transparent;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0A1F29;--surface:#102F3E;--ink:#E8EEF1;--muted:#9DB0BC;--line:#25485A;--blue:#87D1E6;--blue-soft:#17404F;--red:#F18A00;--red-soft:#3A2A14;--good:#5CC49A;--good-soft:#173328;--warn:#E3B04B;--warn-soft:#38301A;--bad:#EE7A6C;--bad-soft:#3A2321;--grid:transparent;color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-b);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px}
 .wrap{max-width:980px;margin:0 auto;padding-inline:16px;padding-block:20px 56px}
 .top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font:12px var(--f-m);color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
 .top a{color:var(--blue)}
-h1{font:700 clamp(28px,5vw,42px)/1.08 var(--f-d);margin:14px 0 8px;text-wrap:balance;letter-spacing:-.01em}
-h2{font:600 20px/1.2 var(--f-d);margin:0 0 4px;text-wrap:balance}
+h1{font:600 clamp(34px,6vw,52px)/1.04 var(--f-d);margin:14px 0 8px;text-wrap:balance;letter-spacing:-.01em}
+h2{font:600 26px/1.15 var(--f-d);margin:0 0 4px;text-wrap:balance}
 h3{font:600 15px var(--f-b);margin:0}
 .lead{max-width:62ch;color:var(--muted);margin:0 0 6px}
 .how{display:flex;flex-wrap:wrap;gap:8px 18px;margin:14px 0 22px;font-size:13px;color:var(--muted)}
