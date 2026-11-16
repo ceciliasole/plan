@@ -4,12 +4,15 @@
 .c{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px;display:flex;flex-direction:column;gap:6px}
 .c h2{font-size:18px}.c p{margin:0;color:var(--muted);font-size:14px;flex:1}.m{font:12px var(--f-m);color:var(--red);text-transform:uppercase;letter-spacing:.06em}
 .go{align-self:flex-start;font-weight:600;color:var(--blue);border-bottom:2px solid var(--red)}
+.dx{display:flex;align-items:center;justify-content:space-between;gap:12px 20px;flex-wrap:wrap;margin:22px 0 0;padding:16px 20px;border-radius:6px;background:var(--red);color:var(--surface);text-decoration:none}
+.dx b{font:600 24px/1.15 var(--f-d)}.dx span{font-size:14px}.dx i{font:600 14px var(--f-b);font-style:normal;border:2px solid currentColor;border-radius:4px;padding:6px 12px}
+.dx:hover{filter:brightness(1.08)}.dx+ol.list{margin-top:12px}
 .who{display:flex;align-items:center;gap:12px}.who img{height:44px;max-width:160px;object-fit:contain}</style>
 <header class="mast"><div><img class="g" src="/static/marca/guarani-blanco.png" alt="Guaraní Agency"><span class="div"></span><img class="i" src="/static/marca/impactese-blanco.png" alt="impactese"><span class="t">Plan estratégico</span></div></header>
 <div class="wrap"><div class="top"><span id="mail"></span><span><a href="/onboarding" id="orglink" hidden>Datos de la organización</a> <a href="#" id="out">Salir</a></span></div>
 <div class="who" style="margin-top:14px"><img id="logo" alt="" hidden><h1 id="org" style="margin:0"></h1></div>
 <div class="row" id="orgbar" style="margin-top:12px" hidden><label class="f">Organización<select id="orgsel"></select></label><button type="button" class="g" id="addorg">Agregar organización</button><button type="button" class="g" id="invite">Invitar a alguien</button><span class="sub" id="orgmsg" role="status"></span></div>
-<div id="pay" class="note" role="status" hidden></div><p class="lead" id="prog"></p><ol class="list" id="list"></ol></div>
+<div id="pay" class="note" role="status" hidden></div><p class="lead" id="prog"></p><a class="dx" href="/diagnostico"><div><b>Empezar diagnóstico de situación</b><br><span>3 minutos, 12 semáforos. Sin inscripción: ves el resultado al terminar.</span></div><i>Empezar →</i></a><ol class="list" id="list"></ol></div>
 <script>
 const DESC={prioridades:'Qué hacer ya, qué planificar, qué delegar y qué dejar ir.',bcg:'Qué programas invertir, sostener, cosechar o cerrar.',pestel:'Cómo te afecta el contexto político, económico, social, tecnológico, ambiental y legal.',stakeholders:'A quién dedicarle tiempo, según poder e interés.',identidad:'Tu propósito, misión, visión o manifiesto, y el enunciado que guía lo que decís.',matriz:'Dónde estás frente a tus alternativas reales y dónde hay espacio.',finanzas:'Reservas, dependencia, fondos asegurados y peso de la estructura.',digital:'Qué es tuyo, qué depende de una persona y qué está expuesto.',roi:'Cuánto valor social genera cada peso, con su rango de fragilidad.',okr:'Objetivos, resultados clave, responsables y cronograma.',presupuesto:'Caja mes a mes y los baches que hay que cubrir.',plan:'Todo junto, con riesgos y los primeros 90 días.'};
 const L={todo:'Sin empezar',started:'En curso',done:'Terminado'},K={todo:'',started:'warn',done:'good'};

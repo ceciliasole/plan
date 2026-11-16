@@ -20,7 +20,7 @@ const getOrg = async id => (await one('SELECT * FROM impactese_orgs WHERE id=$1'
 const mapMail = e => (typeof e === 'string' ? e.trim().toLowerCase() : '');
 
 // ---------- Login ----------
-app.get('/api/config', (_q, res) => res.json({ googleClientId: CLIENT_ID, devLogin: process.env.DEV_LOGIN === '1', payUrl: process.env.PAY_URL || '', contact: process.env.CONTACT_EMAIL || 'cecilia.sole@gmail.com' }));
+app.get('/api/config', (_q, res) => res.json({ googleClientId: CLIENT_ID, devLogin: process.env.DEV_LOGIN === '1', payUrl: process.env.PAY_URL || '', contact: process.env.CONTACT_EMAIL || 'hola@guaraniagency.com' }));
 
 async function finishLogin(res, email) {
   setSession(res, email);
@@ -146,7 +146,7 @@ app.get('/tools/:id', requireUser, async (req, res) => {
   let imp, css = '';
   if (!req.user.paid) {
     // Vista previa: datos de ejemplo, sin tocar lo guardado, todo deshabilitado.
-    imp = { id, state: null, done: false, org: null, readonly: true, pay: { url: process.env.PAY_URL || '', contact: process.env.CONTACT_EMAIL || 'cecilia.sole@gmail.com' } };
+    imp = { id, state: null, done: false, org: null, readonly: true, pay: { url: process.env.PAY_URL || '', contact: process.env.CONTACT_EMAIL || 'hola@guaraniagency.com' } };
   } else {
     if (!org.confirmed) return res.redirect('/onboarding');
     const row = await one('SELECT json,done FROM impactese_tool_state WHERE org_id=$1 AND tool_id=$2', [orgId, id]);
@@ -183,7 +183,7 @@ app.delete('/api/admin/customers', requireUser, requireAdmin, async (req, res) =
 // ---------- Páginas ----------
 const page = f => (_q, res) => res.sendFile(f, { root: join(ROOT, 'public') });
 // Páginas legales: públicas (Google las pide para publicar la app) y con el mail de contacto configurable.
-const legal = f => (_q, res) => res.type('html').send(readFileSync(join(ROOT, 'public', f), 'utf8').replaceAll('{{CONTACT}}', process.env.CONTACT_EMAIL || 'cecilia.sole@gmail.com'));
+const legal = f => (_q, res) => res.type('html').send(readFileSync(join(ROOT, 'public', f), 'utf8').replaceAll('{{CONTACT}}', process.env.CONTACT_EMAIL || 'hola@guaraniagency.com'));
 app.get('/privacidad', legal('privacidad.html'));
 app.get('/terminos', legal('terminos.html'));
 app.get('/', page('login.html'));
@@ -191,6 +191,8 @@ app.get('/onboarding', requireUser, async (req, res, next) => (req.user.paid ? n
 app.get('/app', requireUser, async (req, res, next) => (!req.user.paid || (await getOrg(req.user.orgId)).confirmed ? page('app.html')(req, res) : res.redirect('/onboarding')));
 app.get('/admin', requireUser, requireAdmin, page('admin.html'));
 app.use('/static/marca', express.static(join(ROOT, 'fuente', 'marca'), { maxAge: '1d' }));
+// Diagnóstico de situación: abierto a cualquier persona con sesión (paga o no). Las respuestas no salen del navegador.
+app.get('/diagnostico', requireUser, page('diagnostico.html'));
 app.get('/static/core.css', (_q, res) => res.sendFile('fuente/core.css', { root: ROOT }));
 
 app.use((err, _q, res, _n) => { console.error(err); res.status(500).json({ error: 'Error del servidor' }); });
