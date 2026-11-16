@@ -21,3 +21,7 @@ Google: en Google Cloud Console → Credenciales → ID de cliente OAuth (Aplica
 - **Pago = lista manual** que cargás vos en `/admin`. No hay integración con Mercado Pago/Stripe.
 - **Varias organizaciones por persona**: además de la organización de su dominio, alguien puede sumar otras (consultoras, quien asesora a varias fundaciones). En `/app`, "Agregar organización" crea una por dominio y "Invitar a alguien" suma a una persona a la organización activa; el selector cambia entre ellas. Ser admin **no** da acceso a los datos de otras organizaciones: cada una decide a quién invita. Si una organización ya tiene datos, hay que pedir que te inviten. Tabla `impactese_members` (email, org_id).
 - Sin botón "Compartir con impactese" todavía (ver LEEME.md, punto 1).
+
+## Diagnóstico de situación (`/diagnostico`)
+Tarjeta destacada arriba del índice. 27 afirmaciones (2 o 3 por herramienta) que se contestan Sí / A veces / No, donde «Sí» es siempre el problema. Sí=2, A veces=1, No=0; el semáforo de cada paso sale del porcentaje del máximo: menos de 34 % verde, 34 a 66 % amarillo, más de 66 % rojo. Es abierto: lo ve cualquier persona con sesión, paga o no. Las respuestas viven solo en `sessionStorage` del navegador; no se guardan en el servidor. Las preguntas están en `public/diagnostico.html` (constante `Q`).
+El mail de contacto por defecto pasó a `hola@guaraniagency.com`; si en Vercel está definida `CONTACT_EMAIL`, manda esa variable.

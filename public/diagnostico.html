@@ -1,0 +1,75 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Diagnóstico de situación</title><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="/static/core.css">
+<style>
+.dg{border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:14px 16px;margin-block:12px}
+.dg>.m{font:12px var(--f-m);color:var(--red);text-transform:uppercase;letter-spacing:.06em}
+.dg h2{font-size:20px;margin:2px 0 8px}
+fieldset{border:0;margin:0;padding:10px 0;border-top:1px solid var(--line)}
+fieldset:first-of-type{border-top:0}
+legend{padding:0;font-size:15px;max-width:70ch}
+.opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.opts label{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:4px;padding:6px 12px;cursor:pointer;background:var(--bg)}
+.opts label:has(input:checked){border-color:var(--blue);background:var(--blue-soft);font-weight:600}
+.bar{position:sticky;bottom:0;background:var(--bg);border-top:1px solid var(--line);padding:10px 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.res{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:12px;margin:18px 0}
+.r{border:1px solid var(--line);border-left-width:8px;border-radius:6px;background:var(--surface);padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.r.bad{border-left-color:var(--bad)}.r.warn{border-left-color:var(--warn)}.r.good{border-left-color:var(--good)}
+.r h3{font-size:16px}.r ul{margin:0;padding-left:18px;color:var(--muted);font-size:13px}
+.r a{align-self:flex-start;font-weight:600;color:var(--blue);border-bottom:2px solid var(--red)}
+.sum{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.cta{border-left:3px solid var(--red);background:var(--red-soft);padding:12px 16px;margin-top:22px;border-radius:0 6px 6px 0}
+</style>
+<div class="wrap"><div class="top"><a href="/app">← Volver a las 12 herramientas</a></div>
+<h1>Diagnóstico de situación</h1>
+<p class="lead" id="intro">Una a tres afirmaciones por cada una de las 12 herramientas. Contestá con sinceridad: no hay respuestas buenas ni malas, y lo que respondas no sale de tu navegador. Al final ves un semáforo con cómo estás en cada aspecto.</p>
+<form id="f" novalidate></form>
+<section id="out" hidden aria-live="polite"></section>
+</div>
+<script>
+// "Sí" es siempre el problema. Sí=2, A veces=1, No=0. Semáforo por porcentaje del máximo del paso: <34% verde, 34–66% amarillo, >66% rojo.
+const Q=[
+{id:'prioridades',q:['Casi todo lo que hacemos se siente urgente y casi nada, importante.','Cuando llega algo nuevo, lo sumamos sin sacar nada.','Hace un año que no dejamos de hacer algo a propósito.']},
+{id:'bcg',q:['Hay programas que sostenemos por costumbre, no por sus resultados.','No sabemos cuánto cuesta ni qué devuelve cada programa.']},
+{id:'pestel',q:['Un cambio de contexto (regulación, economía, financiadores) nos agarraría sin plan B.','Miramos el contexto cuando ya nos afectó, no antes.']},
+{id:'stakeholders',q:['Hay personas clave de las que dependemos y con las que hace meses no hablamos.','Dedicamos más tiempo a quien reclama que a quien decide.']},
+{id:'identidad',q:['Dos personas del equipo explicarían distinto qué hacemos y para quién.','Nuestro propósito está escrito, pero no guía decisiones reales.']},
+{id:'matriz',q:['Un financiador podría confundirnos con otra organización parecida.','No podemos decir en una frase por qué nos eligen a nosotros y no a otra.']},
+{id:'finanzas',q:['Si se cae el mayor financiador, no cubrimos tres meses de gastos.','Más de la mitad de los ingresos viene de una sola fuente.','La estructura y los sueldos pesan más de lo que podemos sostener sin fondos nuevos.']},
+{id:'digital',q:['Alguna cuenta o sistema clave depende de la clave o el mail de una sola persona.','Si alguien se va mañana, perderíamos acceso a algo que no está respaldado.','No sabemos con certeza quién tiene acceso a qué.']},
+{id:'roi',q:['No podemos decir cuánto valor social generamos por cada peso invertido.','Contamos actividades (talleres, personas alcanzadas), pero no cambios.']},
+{id:'okr',q:['Hay objetivos sin nombre y apellido de responsable.','Nadie revisó el avance del plan en el último trimestre.']},
+{id:'presupuesto',q:['Hay meses en los que no sabemos si vamos a poder pagar todo.','El presupuesto se armó una vez y no se ajusta.']},
+{id:'plan',q:['Tenemos un plan, pero no lo usamos para decidir.','No podríamos decir qué vamos a hacer en los próximos 90 días.']}];
+const OPT=[['si','Sí',2],['av','A veces',1],['no','No',0]];
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const KEY='impactese:diagnostico';let A={};try{A=JSON.parse(sessionStorage.getItem(KEY)||'{}')}catch(e){}
+const save=()=>{try{sessionStorage.setItem(KEY,JSON.stringify(A))}catch(e){}};
+let names={},contact='hola@guaraniagency.com',paid=false;
+const level=p=>p<.34?['good','Verde','Vas bien en este aspecto']:p<=.66?['warn','Amarillo','Conviene mirarlo']:['bad','Rojo','Hay que atenderlo pronto'];
+function draw(){
+  f.innerHTML=Q.map((s,i)=>'<div class="dg"><span class="m">Paso '+(i+1)+'</span><h2>'+esc(names[s.id]||s.id)+'</h2>'+s.q.map((t,j)=>{const k=s.id+'.'+j;return '<fieldset><legend>'+esc(t)+'</legend><div class="opts">'+OPT.map(o=>'<label><input type="radio" name="'+k+'" value="'+o[0]+'"'+(A[k]===o[0]?' checked':'')+'> '+o[1]+'</label>').join('')+'</div></fieldset>'}).join('')+'</div>').join('')
+   +'<div class="bar"><button type="submit" class="p">Ver mi semáforo</button><span class="sub" id="cnt" role="status"></span></div>';
+  count()}
+function count(){const t=Q.reduce((n,s)=>n+s.q.length,0),d=Object.keys(A).length;document.getElementById('cnt').textContent=d+' de '+t+' respondidas'}
+f.addEventListener('change',e=>{if(e.target.type==='radio'){A[e.target.name]=e.target.value;save();count()}});
+f.addEventListener('submit',e=>{e.preventDefault();
+  const miss=Q.flatMap(s=>s.q.map((_,j)=>s.id+'.'+j)).filter(k=>!A[k]);
+  if(miss.length){document.getElementById('cnt').textContent='Te faltan '+miss.length+' respuestas.';const el=f.querySelector('input[name="'+miss[0]+'"]');el.closest('fieldset').scrollIntoView({block:'center'});el.focus();return}
+  show()});
+function show(){
+  const R=Q.map((s,i)=>{const pts=s.q.reduce((n,_,j)=>n+OPT.find(o=>o[0]===A[s.id+'.'+j])[2],0),p=pts/(s.q.length*2);return {s,i,p,l:level(p),dol:s.q.filter((_,j)=>A[s.id+'.'+j]==='si')}});
+  const c={bad:0,warn:0,good:0};R.forEach(r=>c[r.l[0]]++);
+  const order=[...R].sort((a,b)=>b.p-a.p||a.i-b.i);
+  const out=document.getElementById('out');
+  out.innerHTML='<h2>Tu semáforo</h2><div class="sum"><span class="chip bad">'+c.bad+' en rojo</span><span class="chip warn">'+c.warn+' en amarillo</span><span class="chip good">'+c.good+' en verde</span></div>'
+   +'<p class="lead">'+(c.bad?'Empezá por los rojos, de arriba hacia abajo: están ordenados del que más urgencia tiene al que menos.':'No hay rojos. Igual conviene revisar los amarillos antes de que se conviertan en uno.')+'</p>'
+   +'<div class="res">'+order.map(r=>'<div class="r '+r.l[0]+'"><span class="chip '+r.l[0]+'">'+r.l[1]+'</span><h3>Paso '+(r.i+1)+'. '+esc(names[r.s.id]||r.s.id)+'</h3><p class="sub">'+r.l[2]+'.</p>'
+     +(r.dol.length?'<ul>'+r.dol.map(t=>'<li>'+esc(t)+'</li>').join('')+'</ul>':'')+'<a href="/tools/'+r.s.id+'">'+(!paid?'Ver cómo funciona':r.l[0]==='good'?'Ver la herramienta':'Trabajar este paso')+'</a></div>').join('')+'</div>'
+   +'<div class="cta"><b>¿Querés ayuda para bajar esto a un plan?</b><br>Escribinos a <a href="mailto:'+esc(contact)+'">'+esc(contact)+'</a> y lo vemos juntos.</div>'
+   +'<p class="row" style="margin-top:16px"><button type="button" id="again">Volver a responder</button> <a href="/app">Ver las 12 herramientas</a></p>';
+  out.hidden=false;f.hidden=true;document.getElementById('intro').hidden=true;out.scrollIntoView();
+  document.getElementById('again').onclick=()=>{A={};save();out.hidden=true;f.hidden=false;document.getElementById('intro').hidden=false;draw();scrollTo(0,0)}}
+(async()=>{
+  try{const [pr,cfg,me]=await Promise.all([fetch('/api/progress').then(r=>r.json()),fetch('/api/config').then(r=>r.json()),fetch('/api/me').then(r=>r.json())]);paid=!!me.paid;pr.forEach(p=>names[p.id]=p.name);if(cfg.contact)contact=cfg.contact}catch(e){}
+  draw()})();
+</script>
